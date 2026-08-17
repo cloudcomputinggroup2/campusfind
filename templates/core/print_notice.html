@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Notice - {{ item.title }} - CampusFind</title>
+    
+    <!-- Bootstrap CSS for layout -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        body {
+            background-color: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #111827;
+        }
+        .notice-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: #ffffff;
+            border: 4px solid #0f172a;
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .notice-header {
+            text-align: center;
+            border-bottom: 3px solid #0f172a;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .notice-type {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        .notice-type.lost {
+            color: #dc2626;
+        }
+        .notice-type.found {
+            color: #0284c7;
+        }
+        .item-photo {
+            max-height: 320px;
+            width: 100%;
+            object-fit: contain;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+        .detail-box {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+        }
+        .tear-off-section {
+            margin-top: 3rem;
+            border-top: 2px dashed #94a3b8;
+            padding-top: 1.5rem;
+        }
+        .tear-slip {
+            border-right: 1px dashed #cbd5e1;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            height: 140px;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+            }
+            .notice-container {
+                margin: 0;
+                border: 3px solid #000000;
+                box-shadow: none;
+                padding: 1.5rem;
+                max-width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Controls Bar -->
+    <div class="container text-center my-3 no-print">
+        <button onclick="window.print()" class="btn btn-primary btn-lg rounded-pill px-4 shadow">
+            <i class="bi bi-printer-fill me-1"></i> Print This Notice Flyer
+        </button>
+        <button onclick="window.close()" class="btn btn-outline-secondary btn-lg rounded-pill px-4 ms-2">
+            Close Window
+        </button>
+    </div>
+
+    <div class="notice-container">
+        
+        <!-- Header -->
+        <div class="notice-header">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold text-uppercase tracking-wider small text-muted">CampusFind Official Notice</span>
+                <span class="small text-muted">ID: #{{ item.pk }} &bull; Date: {{ item.date_event|date:"M d, Y" }}</span>
+            </div>
+            
+            <div class="notice-type {% if item.status == 'LOST' %}lost{% else %}found{% endif %}">
+                {% if item.status == 'LOST' %}LOST ITEM{% elif item.status == 'FOUND' %}FOUND ITEM{% else %}REUNITED{% endif %}
+            </div>
+            <h2 class="fw-bold text-dark mb-0">{{ item.title }}</h2>
+        </div>
+
+        <!-- Body Details -->
+        <div class="row g-4 align-items-center mb-4">
+            <div class="col-md-5 text-center">
+                {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}" class="item-photo">
+                {% else %}
+                    <div class="item-photo d-flex flex-column align-items-center justify-content-center py-5">
+                        <i class="bi {{ item.category_icon }} fs-1 text-muted"></i>
+                        <span class="small fw-bold text-muted mt-2">{{ item.get_category_display }}</span>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-7">
+                <div class="detail-box mb-3">
+                    <div class="small fw-bold text-uppercase text-muted">Campus Location</div>
+                    <div class="fs-5 fw-bold text-dark"><i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ item.location }}</div>
+                </div>
+
+                <div class="detail-box mb-3">
+                    <div class="small fw-bold text-uppercase text-muted">Category</div>
+                    <div class="fs-6 fw-bold text-dark">{{ item.get_category_display }}</div>
+                </div>
+
+                <div class="detail-box">
+                    <div class="small fw-bold text-uppercase text-muted">Description</div>
+                    <div class="text-dark small" style="white-space: pre-line;">{{ item.description }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Box -->
+        <div class="p-3 bg-dark text-white rounded-3 text-center mb-3">
+            <h5 class="fw-bold mb-1">IF FOUND OR TO CLAIM, PLEASE CONTACT:</h5>
+            <div class="fs-4 fw-bold text-warning">{{ item.contact }}</div>
+            <div class="small text-secondary mt-1">Reported on CampusFind &bull; {{ request.build_absolute_uri }}</div>
+        </div>
+
+        <!-- Tear-off slips at bottom -->
+        <div class="tear-off-section">
+            <div class="text-center small text-muted mb-2">✂ Tear-off contact strips for bulletin board</div>
+            <div class="d-flex justify-content-between">
+                {% for i in "123456" %}
+                    <div class="tear-slip flex-grow-1">
+                        <span class="fw-bold">{{ item.title|truncatechars:18 }}</span><br>
+                        <span>{{ item.contact|truncatechars:20 }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

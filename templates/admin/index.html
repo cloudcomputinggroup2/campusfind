@@ -1,0 +1,28 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block content_title %}
+<div class="cf-admin-hero">
+    <div class="cf-admin-hero-row">
+        <div>
+            <div class="cf-admin-hero-pill">
+                <i class="bi bi-cloud-check"></i> AWS Cloud Admin Console
+            </div>
+            <h1 class="cf-admin-hero-title">
+                CampusFind Administration Portal
+            </h1>
+            <p class="cf-admin-hero-subtitle">
+                Manage student users, monitor lost & found item records, and verify campus returned property.
+            </p>
+        </div>
+        <div class="cf-admin-hero-actions">
+            <a href="{% url 'admin:core_item_add' %}" class="cf-admin-hero-btn cf-admin-hero-btn-primary">
+                <i class="bi bi-plus-circle-fill"></i> Add New Item
+            </a>
+            <a href="{% url 'admin:core_item_changelist' %}" class="cf-admin-hero-btn cf-admin-hero-btn-secondary">
+                <i class="bi bi-list-ul"></i> Manage All Items
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

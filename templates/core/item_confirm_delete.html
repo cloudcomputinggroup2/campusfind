@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirm Delete - {{ item.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="card border rounded-4 p-4 p-md-5 text-center bg-white shadow-sm">
+                
+                <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mx-auto mb-3 border" style="width: 56px; height: 56px; font-size: 1.5rem; color: var(--lost-color);">
+                    <i class="bi bi-trash3"></i>
+                </div>
+
+                <h4 class="fw-bold mb-2 text-dark">Delete Item Listing?</h4>
+                <p class="text-muted small mb-4">
+                    Are you sure you want to permanently delete this listing? This action cannot be reversed.
+                </p>
+
+                <!-- Item Preview Mini Card -->
+                <div class="p-3 bg-light rounded-3 border text-start mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        {% if item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.title }}" class="rounded-3 border" style="width: 52px; height: 52px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-3 bg-white d-flex align-items-center justify-content-center text-muted border" style="width: 52px; height: 52px;">
+                                <i class="bi {{ item.category_icon }} fs-4"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <span class="badge-status {{ item.status_badge_class }} py-1 px-2 mb-1" style="font-size: 10px;">{{ item.get_status_display }}</span>
+                            <div class="fw-bold text-dark small">{{ item.title }}</div>
+                            <div class="small text-muted">{{ item.location }} &bull; {{ item.date_event|date:"M d, Y" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Buttons -->
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <a href="{{ item.get_absolute_url }}" class="btn btn-sm btn-light border flex-grow-1 rounded-3 py-2">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-sm btn-outline-danger flex-grow-1 rounded-3 py-2">
+                            <i class="bi bi-trash me-1"></i> Delete Permanently
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

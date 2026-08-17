@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Browse Campus Items - CampusFind{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header & Breadcrumbs -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small mb-1 text-muted">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active text-dark" aria-current="page">Browse Directory</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-0">Campus Lost & Found Directory</h2>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'item_create' %}?type=lost" class="btn btn-sm btn-outline-secondary rounded-3 px-3 py-2">
+                <i class="bi bi-search me-1"></i> Report Lost
+            </a>
+            <a href="{% url 'item_create' %}?type=found" class="btn btn-sm btn-primary-custom px-3 py-2">
+                <i class="bi bi-plus-circle me-1"></i> Report Found
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter & Search Card -->
+    <div class="card border rounded-4 mb-4 p-3 p-md-4 bg-white shadow-sm">
+        <form action="{% url 'item_list' %}" method="get" id="filterForm">
+            <div class="row g-3 align-items-center">
+                
+                <!-- Keyword Search -->
+                <div class="col-lg-4">
+                    <label class="form-label small fw-bold text-muted mb-1">Keyword Search</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" value="{{ query_q }}" class="form-control border-start-0 ps-0" placeholder="Title, description, location...">
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="col-md-4 col-lg-3">
+                    <label class="form-label small fw-bold text-muted mb-1">Category</label>
+                    <select name="category" class="form-select" onchange="document.getElementById('filterForm').submit();">
+                        <option value="">All Categories</option>
+                        {% for code, name in ALL_CATEGORIES %}
+                            <option value="{{ code }}" {% if selected_category == code %}selected{% endif %}>{{ name|truncatechars:28 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Campus Location -->
+                <div class="col-md-4 col-lg-3">
+                    <label class="form-label small fw-bold text-muted mb-1">Campus Location</label>
+                    <select name="location" class="form-select" onchange="document.getElementById('filterForm').submit();">
+                        <option value="">All Locations</option>
+                        {% for loc in LOCATION_PRESETS %}
+                            <option value="{{ loc }}" {% if selected_location == loc %}selected{% endif %}>{{ loc }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sort -->
+                <div class="col-md-4 col-lg-2">
+                    <label class="form-label small fw-bold text-muted mb-1">Sort Order</label>
+                    <select name="sort" class="form-select" onchange="document.getElementById('filterForm').submit();">
+                        <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest First</option>
+                        <option value="oldest" {% if selected_sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+                        <option value="title" {% if selected_sort == 'title' %}selected{% endif %}>Title (A-Z)</option>
+                    </select>
+                </div>
+
+                <!-- Hidden view mode preserve -->
+                <input type="hidden" name="view" value="{{ view_mode }}">
+            </div>
+
+            <!-- Status Buttons Bar & Filter Controls -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 pt-3 mt-3 border-top">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="small fw-bold text-muted me-1">Status Filter:</span>
+                    <a href="?{% if query_q %}q={{ query_q }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_location %}location={{ selected_location }}&{% endif %}status=ALL&sort={{ selected_sort }}&view={{ view_mode }}" 
+                       class="btn btn-sm {% if not selected_status or selected_status == 'ALL' %}btn-dark{% else %}btn-light border{% endif %} rounded-pill px-3">
+                        All ({{ GLOBAL_STATS.total }})
+                    </a>
+                    <a href="?{% if query_q %}q={{ query_q }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_location %}location={{ selected_location }}&{% endif %}status=LOST&sort={{ selected_sort }}&view={{ view_mode }}" 
+                       class="btn btn-sm {% if selected_status == 'LOST' %}btn-danger{% else %}btn-light border text-danger{% endif %} rounded-pill px-3">
+                        <i class="bi bi-search me-1"></i> Lost ({{ GLOBAL_STATS.lost }})
+                    </a>
+                    <a href="?{% if query_q %}q={{ query_q }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_location %}location={{ selected_location }}&{% endif %}status=FOUND&sort={{ selected_sort }}&view={{ view_mode }}" 
+                       class="btn btn-sm {% if selected_status == 'FOUND' %}btn-info text-white{% else %}btn-light border text-info{% endif %} rounded-pill px-3">
+                        <i class="bi bi-check-circle me-1"></i> Found ({{ GLOBAL_STATS.found }})
+                    </a>
+                    <a href="?{% if query_q %}q={{ query_q }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_location %}location={{ selected_location }}&{% endif %}status=CLAIMED&sort={{ selected_sort }}&view={{ view_mode }}" 
+                       class="btn btn-sm {% if selected_status == 'CLAIMED' %}btn-success{% else %}btn-light border text-success{% endif %} rounded-pill px-3">
+                        <i class="bi bi-check2-all me-1"></i> Reunited ({{ GLOBAL_STATS.claimed }})
+                    </a>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 ms-auto">
+                    <button type="submit" class="btn btn-sm btn-dark px-3 rounded-3">
+                        Filter
+                    </button>
+                    {% if query_q or selected_category or selected_location or selected_status %}
+                        <a href="{% url 'item_list' %}" class="btn btn-sm btn-light border text-muted rounded-3">
+                            <i class="bi bi-x-circle me-1"></i> Clear
+                        </a>
+                    {% endif %}
+                    <div class="btn-group btn-group-sm ms-2" role="group" aria-label="View switch">
+                        <a href="?{% if query_q %}q={{ query_q }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_location %}location={{ selected_location }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}sort={{ selected_sort }}&view=grid" 
+                           class="btn {% if view_mode != 'table' %}btn-secondary{% else %}btn-outline-secondary{% endif %}" title="Grid View">
+                            <i class="bi bi-grid-3x3-gap"></i>
+                        </a>
+                        <a href="?{% if query_q %}q={{ query_q }}&{% endif %}{% if selected_category %}category={{ selected_category }}&{% endif %}{% if selected_location %}location={{ selected_location }}&{% endif %}{% if selected_status %}status={{ selected_status }}&{% endif %}sort={{ selected_sort }}&view=table" 
+                           class="btn {% if view_mode == 'table' %}btn-secondary{% else %}btn-outline-secondary{% endif %}" title="Table View">
+                            <i class="bi bi-list-ul"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Counter Summary -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="text-muted small mb-0">
+            Showing <strong>{{ items.start_index|default:0 }}–{{ items.end_index|default:0 }}</strong> of <strong>{{ total_results }}</strong> listings
+        </p>
+    </div>
+
+    <!-- Items Display (Grid or Table) -->
+    {% if view_mode == 'table' %}
+        <!-- Table View -->
+        <div class="table-custom mb-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Item Details</th>
+                            <th>Status</th>
+                            <th>Category</th>
+                            <th>Campus Location</th>
+                            <th>Date Event</th>
+                            <th>Contact</th>
+                            <th class="text-end pe-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                            <tr>
+                                <td class="ps-4 py-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        {% if item.image %}
+                                            <img src="{{ item.image.url }}" alt="{{ item.title }}" class="rounded-3 border" style="width: 48px; height: 48px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="rounded-3 bg-light d-flex align-items-center justify-content-center text-muted border" style="width: 48px; height: 48px;">
+                                                <i class="bi {{ item.category_icon }} fs-5"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <a href="{{ item.get_absolute_url }}" class="fw-bold text-dark text-decoration-none">
+                                                {{ item.title }}
+                                            </a>
+                                            <div class="text-muted small">{{ item.description|truncatechars:40 }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge-status {{ item.status_badge_class }}">
+                                        {{ item.get_status_display }}
+                                    </span>
+                                </td>
+                                <td><span class="small text-secondary">{{ item.get_category_display|truncatechars:22 }}</span></td>
+                                <td><i class="bi bi-geo-alt text-muted me-1"></i><span class="small">{{ item.location }}</span></td>
+                                <td><span class="small text-muted">{{ item.date_event|date:"M d, Y" }}</span></td>
+                                <td><span class="small text-muted text-break">{{ item.contact|truncatechars:20 }}</span></td>
+                                <td class="text-end pe-4">
+                                    <a href="{{ item.get_absolute_url }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                                        Details
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5">
+                                    <i class="bi bi-search fs-2 text-muted mb-2"></i>
+                                    <h6 class="fw-bold">No matching items found</h6>
+                                    <p class="text-muted small mb-0">Try changing your search terms or filter criteria.</p>
+                                    <a href="{% url 'item_list' %}" class="btn btn-sm btn-outline-secondary rounded-pill mt-2">Clear Filters</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <!-- Grid View -->
+        <div class="row g-4 mb-4">
+            {% for item in items %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="item-card">
+                        <div class="item-card-image-wrapper">
+                            <span class="badge-status {{ item.status_badge_class }} position-absolute top-0 start-0 m-3 z-1 shadow-sm">
+                                {% if item.status == 'LOST' %}<i class="bi bi-search"></i>{% elif item.status == 'FOUND' %}<i class="bi bi-pin-map-fill"></i>{% else %}<i class="bi bi-check2-all"></i>{% endif %}
+                                {{ item.get_status_display }}
+                            </span>
+                            {% if item.image %}
+                                <img src="{{ item.image.url }}" alt="{{ item.title }}" class="item-card-image" loading="lazy">
+                            {% else %}
+                                <div class="item-card-placeholder">
+                                    <i class="bi {{ item.category_icon }}"></i>
+                                    <span class="small fw-semibold">{{ item.get_category_display|truncatechars:25 }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="item-card-body">
+                            <div class="item-card-category">
+                                <i class="bi {{ item.category_icon }}"></i>
+                                <span>{{ item.get_category_display|truncatechars:28 }}</span>
+                            </div>
+                            <h5 class="item-card-title">
+                                <a href="{{ item.get_absolute_url }}" class="text-dark text-decoration-none stretched-link">
+                                    {{ item.title }}
+                                </a>
+                            </h5>
+                            <p class="item-card-description">{{ item.description }}</p>
+                            <div class="item-card-meta">
+                                <span><i class="bi bi-geo-alt me-1 text-muted"></i>{{ item.location|truncatechars:22 }}</span>
+                                <span><i class="bi bi-calendar3 me-1 text-muted"></i>{{ item.date_event|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <div class="text-center py-5 bg-white rounded-4 border">
+                        <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <i class="bi bi-search fs-3 text-muted"></i>
+                        </div>
+                        <h5 class="fw-bold">No Items Matched Your Criteria</h5>
+                        <p class="text-muted small mx-auto mb-3" style="max-width: 440px;">
+                            We couldn't find any items matching your active search filters. Try adjusting your query or reset the filters.
+                        </p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{% url 'item_list' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Reset Filters</a>
+                            <a href="{% url 'item_create' %}" class="btn btn-sm btn-primary-custom rounded-pill px-3">Report an Item</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Pagination -->
+    {% if items.has_other_pages %}
+        <nav aria-label="Page navigation" class="d-flex justify-content-center my-4">
+            <ul class="pagination pagination-sm">
+                {% if items.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ items.previous_page_number }}{% if query_q %}&q={{ query_q }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}&sort={{ selected_sort }}&view={{ view_mode }}" aria-label="Previous">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i></span></li>
+                {% endif %}
+
+                {% for p in items.paginator.page_range %}
+                    {% if items.number == p %}
+                        <li class="page-item active"><span class="page-link bg-dark border-dark">{{ p }}</span></li>
+                    {% elif p > items.number|add:"-3" and p < items.number|add:"3" %}
+                        <li class="page-item"><a class="page-link text-dark" href="?page={{ p }}{% if query_q %}&q={{ query_q }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}&sort={{ selected_sort }}&view={{ view_mode }}">{{ p }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if items.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ items.next_page_number }}{% if query_q %}&q={{ query_q }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}{% if selected_location %}&location={{ selected_location }}{% endif %}&sort={{ selected_sort }}&view={{ view_mode }}" aria-label="Next">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right"></i></span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+</div>
+{% endblock %}

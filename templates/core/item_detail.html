@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ item.title }} - CampusFind{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Breadcrumb & Back Navigation -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small mb-0 text-muted">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'item_list' %}" class="text-decoration-none">Directory</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'item_list' %}?category={{ item.category }}" class="text-decoration-none">{{ item.get_category_display|truncatechars:20 }}</a></li>
+                <li class="breadcrumb-item active text-dark" aria-current="page">{{ item.title|truncatechars:25 }}</li>
+            </ol>
+        </nav>
+        <a href="{% url 'item_list' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+    </div>
+
+    <div class="row g-4">
+        
+        <!-- Left Column: Item Image & Visual Preview -->
+        <div class="col-lg-6">
+            <div class="card border rounded-4 overflow-hidden position-sticky bg-white shadow-sm" style="top: 90px;">
+                <div class="position-relative bg-light text-center p-3" style="min-height: 380px; display: flex; align-items: center; justify-content: center;">
+                    
+                    <!-- Status Badge Floating -->
+                    <span class="badge-status {{ item.status_badge_class }} position-absolute top-0 start-0 m-3 z-1 shadow-sm fs-6 py-2 px-3">
+                        {% if item.status == 'LOST' %}<i class="bi bi-search"></i>{% elif item.status == 'FOUND' %}<i class="bi bi-pin-map-fill"></i>{% else %}<i class="bi bi-check2-all"></i>{% endif %}
+                        {{ item.get_status_display }}
+                    </span>
+
+                    {% if item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.title }}" class="img-fluid rounded-3" style="max-height: 440px; object-fit: contain; width: 100%;" data-bs-toggle="modal" data-bs-target="#imageModal" role="button">
+                        <button class="btn btn-sm btn-dark bg-opacity-75 text-white position-absolute bottom-0 end-0 m-3 rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#imageModal">
+                            <i class="bi bi-arrows-fullscreen me-1"></i> Expand
+                        </button>
+                    {% else %}
+                        <div class="py-5 text-muted text-center">
+                            <i class="bi {{ item.category_icon }}" style="font-size: 4.5rem; opacity: 0.5;"></i>
+                            <h6 class="mt-3 text-secondary">{{ item.get_category_display }}</h6>
+                            <span class="badge bg-light text-muted border">No Image Provided</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Quick Action Bar under image -->
+                <div class="card-footer bg-white border-top p-3 d-flex justify-content-between align-items-center">
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill btn-copy" data-copy-text="{{ request.build_absolute_uri }}">
+                        <i class="bi bi-share me-1"></i> Copy Link
+                    </button>
+                    <a href="{% url 'print_notice' pk=item.pk %}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill">
+                        <i class="bi bi-printer me-1"></i> Print Notice Flyer
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Item Information & Actions -->
+        <div class="col-lg-6">
+            <div class="card border rounded-4 p-4 mb-4 bg-white shadow-sm">
+                
+                <!-- Category & Time -->
+                <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                    <span class="badge bg-light text-secondary border fw-semibold px-3 py-2 rounded-pill small">
+                        <i class="bi {{ item.category_icon }} me-1"></i> {{ item.get_category_display }}
+                    </span>
+                    <span class="text-muted small">
+                        <i class="bi bi-clock-history me-1"></i> Posted {{ item.created_at|timesince }} ago
+                    </span>
+                </div>
+
+                <!-- Title -->
+                <h2 class="fw-bold mb-3 text-dark">{{ item.title }}</h2>
+
+                <!-- Key Attributes Grid -->
+                <div class="row g-2 mb-4">
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <span class="text-muted small d-block mb-1">Campus Location</span>
+                            <strong class="text-dark"><i class="bi bi-geo-alt-fill text-muted me-1"></i>{{ item.location }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <span class="text-muted small d-block mb-1">Date of Event</span>
+                            <strong class="text-dark"><i class="bi bi-calendar-event text-muted me-1"></i>{{ item.date_event|date:"F d, Y" }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark text-uppercase small tracking-wider mb-2">Description & Identifiers</h6>
+                    <div class="p-3 rounded-3 bg-light border text-dark" style="white-space: pre-line; line-height: 1.6; font-size: 0.925rem;">
+                        {{ item.description }}
+                    </div>
+                </div>
+
+                <!-- Contact & Recovery Card -->
+                <div class="contact-card mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-person-lines-fill text-dark fs-5"></i>
+                        <h6 class="fw-bold mb-0 text-dark">Contact Information</h6>
+                    </div>
+                    <p class="small text-muted mb-3">
+                        If this item belongs to you or you have information, connect using the details below:
+                    </p>
+                    <div class="d-flex align-items-center justify-content-between p-2 bg-white rounded-3 border mb-3">
+                        <span class="fw-semibold text-dark text-break ps-1"><i class="bi bi-chat-text me-2 text-muted"></i>{{ item.contact }}</span>
+                        <button class="btn btn-sm btn-light border btn-copy" data-copy-text="{{ item.contact }}" title="Copy Contact">
+                            <i class="bi bi-clipboard"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="mailto:{{ item.contact }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                            <i class="bi bi-envelope me-1"></i> Email
+                        </a>
+                        <a href="tel:{{ item.contact }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                            <i class="bi bi-telephone me-1"></i> Call Phone
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Owner / Staff Actions Section -->
+                {% if is_owner %}
+                    <div class="p-3 rounded-3 border bg-light mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold text-dark mb-0"><i class="bi bi-sliders me-1"></i> Manage Your Listing</h6>
+                            <span class="badge bg-dark text-white">Owner Controls</span>
+                        </div>
+                        <p class="small text-muted mb-3">
+                            Keep this listing updated or mark it resolved once successfully returned.
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <!-- Toggle Status Form -->
+                            <form action="{% url 'item_toggle_status' pk=item.pk %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                {% if item.status == 'CLAIMED' %}
+                                    <input type="hidden" name="action" value="reopen">
+                                    <button type="submit" class="btn btn-warning btn-sm rounded-3">
+                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reopen Listing
+                                    </button>
+                                {% else %}
+                                    <input type="hidden" name="action" value="claim">
+                                    <button type="submit" class="btn btn-success btn-sm rounded-3">
+                                        <i class="bi bi-check2-circle me-1"></i> Mark as Claimed / Reunited 🎉
+                                    </button>
+                                {% endif %}
+                            </form>
+
+                            <!-- Edit Button -->
+                            <a href="{% url 'item_update' pk=item.pk %}" class="btn btn-outline-secondary btn-sm rounded-3">
+                                <i class="bi bi-pencil-square me-1"></i> Edit
+                            </a>
+
+                            <!-- Delete Button -->
+                            <a href="{% url 'item_delete' pk=item.pk %}" class="btn btn-outline-danger btn-sm rounded-3">
+                                <i class="bi bi-trash me-1"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Campus Safety & Verification Notice -->
+                <div class="alert alert-light border d-flex align-items-start gap-2 rounded-3 small mb-0 text-muted">
+                    <i class="bi bi-shield-check fs-5 flex-shrink-0 text-dark"></i>
+                    <div>
+                        <strong class="text-dark">Safe Recovery Checklist:</strong> Meet in a public campus location (such as Central Library or Campus Security desk). Request distinctive verification details before handing over items.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Items Section -->
+    {% if related_items %}
+        <div class="mt-5 pt-4 border-top">
+            <h4 class="fw-bold mb-3">Similar Items in {{ item.get_category_display|truncatechars:30 }}</h4>
+            <div class="row g-3">
+                {% for rel in related_items %}
+                    <div class="col-md-4">
+                        <div class="item-card">
+                            <div class="item-card-image-wrapper" style="height: 140px;">
+                                <span class="badge-status {{ rel.status_badge_class }} position-absolute top-0 start-0 m-2 z-1 shadow-sm">
+                                    {{ rel.get_status_display }}
+                                </span>
+                                {% if rel.image %}
+                                    <img src="{{ rel.image.url }}" alt="{{ rel.title }}" class="item-card-image">
+                                {% else %}
+                                    <div class="item-card-placeholder">
+                                        <i class="bi {{ rel.category_icon }} fs-4"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="item-card-body p-3">
+                                <h6 class="item-card-title mb-1">
+                                    <a href="{{ rel.get_absolute_url }}" class="text-dark text-decoration-none stretched-link">
+                                        {{ rel.title }}
+                                    </a>
+                                </h6>
+                                <div class="small text-muted"><i class="bi bi-geo-alt me-1"></i>{{ rel.location|truncatechars:24 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+
+<!-- Photo Fullscreen Modal -->
+{% if item.image %}
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 rounded-4 overflow-hidden shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="imageModalLabel">{{ item.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-3">
+                <img src="{{ item.image.url }}" alt="{{ item.title }}" class="img-fluid rounded-3" style="max-height: 75vh;">
+            </div>
+            <div class="modal-footer border-0 pt-0 text-muted small">
+                Cloud Object Storage: Amazon S3 / Local Media
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

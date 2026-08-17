@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign In - CampusFind{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5 col-xl-4">
+            
+            <div class="card border rounded-4 p-4 p-md-4 mb-3 bg-white shadow-sm">
+                
+                <div class="text-center mb-4">
+                    <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-2 border" style="width: 50px; height: 50px; font-size: 1.4rem; color: var(--brand-primary);">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">Campus Sign In</h3>
+                    <p class="text-muted small">Log in with your university credentials</p>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger rounded-3 small">
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Username -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-person"></i></span>
+                            <input type="text" name="username" class="form-control border-start-0 ps-0" placeholder="e.g. student_alex" autofocus required id="id_username">
+                        </div>
+                        {% if form.username.errors %}
+                            <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white text-muted border-end-0"><i class="bi bi-lock"></i></span>
+                            <input type="password" name="password" class="form-control border-start-0 ps-0" placeholder="••••••••" required id="id_password">
+                        </div>
+                        {% if form.password.errors %}
+                            <div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <input type="hidden" name="next" value="{{ next }}">
+
+                    <button type="submit" class="btn btn-primary-custom w-100 py-2 rounded-3 fw-bold mb-3">
+                        Sign In
+                    </button>
+
+                    <div class="text-center small text-muted">
+                        Don't have an account? <a href="{% url 'register' %}" class="fw-semibold text-decoration-none">Register here</a>
+                    </div>
+
+                </form>
+
+            </div>
+
+            <!-- Demo Helper Card for Capstone Evaluators -->
+            <div class="card border bg-light rounded-3 p-3">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <i class="bi bi-info-circle text-muted"></i>
+                    <span class="small fw-bold text-dark">Demo Test Credentials</span>
+                </div>
+                <div class="small text-secondary">
+                    <div><strong>Admin / Staff:</strong> <code>admin</code> / <code>campus2026!</code></div>
+                    <div><strong>Student User:</strong> <code>student_alex</code> / <code>campus2026!</code></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

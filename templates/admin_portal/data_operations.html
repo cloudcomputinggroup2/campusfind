@@ -1,0 +1,204 @@
+{% extends 'admin_portal/base_admin.html' %}
+{% load static %}
+
+{% block title %}Data Operations & Lifecycle - Admin Portal{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small mb-1 text-muted">
+                <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}" class="text-decoration-none">Admin</a></li>
+                <li class="breadcrumb-item active text-dark" aria-current="page">Data Operations</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-0">Controlled Data Operations & Recovery</h2>
+    </div>
+    <div class="d-flex gap-2">
+        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill small">
+            Soft-Deleted: <strong>{{ soft_deleted_count }}</strong> items
+        </span>
+    </div>
+</div>
+
+<!-- Bulk Data Actions Card -->
+<div class="card border rounded-4 bg-white shadow-sm p-4 mb-4">
+    <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-stack text-primary fs-5"></i>
+        <h5 class="fw-bold mb-0 text-dark">Automated Bulk Lifecycle Actions</h5>
+    </div>
+    <p class="text-muted small mb-4">
+        Execute approved bulk actions across campus listings. All bulk changes are recorded in the immutable audit log.
+    </p>
+
+    <div class="row g-3">
+        <!-- Action 1: Bulk Archive Claimed -->
+        <div class="col-md-6">
+            <div class="p-3 bg-light rounded-3 border h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <h6 class="fw-bold text-dark mb-1">Archive All Claimed Items</h6>
+                    <p class="text-muted small mb-3">
+                        Moves all listings currently marked as "Claimed / Reunited" into the soft-deleted archive queue.
+                    </p>
+                </div>
+                <form action="{% url 'admin_bulk_operation' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="bulk_action" value="archive_claimed">
+                    <div class="mb-2">
+                        <input type="text" name="reason" class="form-control form-control-sm" placeholder="Mandatory reason for bulk archive..." required>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-outline-secondary w-100 rounded-3" onclick="return confirm('Are you sure you want to archive all claimed listings?');">
+                        <i class="bi bi-archive me-1"></i> Execute Bulk Archive
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Action 2: Bulk Restore All -->
+        <div class="col-md-6">
+            <div class="p-3 bg-light rounded-3 border h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <h6 class="fw-bold text-dark mb-1">Restore All Soft-Deleted Items</h6>
+                    <p class="text-muted small mb-3">
+                        Restores all currently soft-deleted items back into the active public campus catalog.
+                    </p>
+                </div>
+                <form action="{% url 'admin_bulk_operation' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="bulk_action" value="restore_all">
+                    <div class="mb-2">
+                        <input type="text" name="reason" class="form-control form-control-sm" placeholder="Mandatory reason for bulk restore..." required>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-outline-success w-100 rounded-3" onclick="return confirm('Are you sure you want to restore all soft-deleted listings?');">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Execute Bulk Restore
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Soft-Deleted Items Queue -->
+<div class="card border rounded-4 bg-white shadow-sm overflow-hidden mb-4">
+    <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="fw-bold mb-0 text-dark">Soft-Deleted Items Queue</h5>
+            <div class="text-muted small">Items soft-deleted by students or moderators awaiting restoration or permanent purge.</div>
+        </div>
+        <span class="badge bg-dark text-white px-3 py-2 rounded-pill small">{{ soft_deleted_count }} in Queue</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 small">
+            <thead>
+                <tr class="table-light">
+                    <th class="ps-4">Item Title</th>
+                    <th>Category</th>
+                    <th>Reporter</th>
+                    <th>Deletion Reason</th>
+                    <th>Deleted At</th>
+                    <th class="text-end pe-4">Lifecycle Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in deleted_items %}
+                    <tr>
+                        <td class="ps-4 py-3">
+                            <span class="fw-bold text-dark">{{ item.title }}</span>
+                            <div class="text-muted" style="font-size: 11px;">ID: #{{ item.id }} &bull; {{ item.location }}</div>
+                        </td>
+                        <td><span class="text-secondary">{{ item.get_category_display|truncatechars:20 }}</span></td>
+                        <td><span class="text-dark fw-semibold">{{ item.user.username }}</span></td>
+                        <td><span class="text-danger">{{ item.deletion_reason|default:"No reason recorded" }}</span></td>
+                        <td><span class="text-muted">{{ item.deleted_at|date:"M d, Y H:i" }}</span></td>
+                        <td class="text-end pe-4">
+                            <div class="d-inline-flex gap-1">
+                                
+                                <!-- Restore Button (Modal Trigger) -->
+                                <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#restoreModal-{{ item.id }}">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
+                                </button>
+
+                                <!-- Permanent Hard Delete Button (Modal Trigger) -->
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#hardDeleteModal-{{ item.id }}">
+                                    <i class="bi bi-trash3-fill me-1"></i> Purge
+                                </button>
+
+                            </div>
+
+                            <!-- Restore Modal -->
+                            <div class="modal fade text-start" id="restoreModal-{{ item.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 rounded-4 overflow-hidden shadow">
+                                        <form action="{% url 'admin_item_restore' pk=item.pk %}" method="post">
+                                            {% csrf_token %}
+                                            <div class="modal-header border-bottom">
+                                                <h5 class="modal-title fw-bold">Restore Item: {{ item.title }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body p-4">
+                                                <p class="small text-muted mb-3">
+                                                    Restoring this item will make it visible in the public search directory again.
+                                                </p>
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-bold text-dark">Mandatory Reason <span class="text-danger">*</span></label>
+                                                    <textarea name="reason" rows="3" class="form-control" placeholder="e.g. Student reported item deleted by accident..." required></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-top bg-light">
+                                                <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-sm btn-success px-3">Confirm Restore</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hard Delete Modal (2-Step Verification) -->
+                            <div class="modal fade text-start" id="hardDeleteModal-{{ item.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 rounded-4 overflow-hidden shadow">
+                                        <form action="{% url 'admin_item_hard_delete' pk=item.pk %}" method="post">
+                                            {% csrf_token %}
+                                            <div class="modal-header border-bottom bg-danger text-white">
+                                                <h5 class="modal-title fw-bold">Permanent Data Purge: #{{ item.id }}</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body p-4">
+                                                <div class="alert alert-danger small mb-3">
+                                                    <strong>Irreversible Operation:</strong> This action will permanently erase item #{{ item.id }} ({{ item.title }}) from the database. This cannot be undone.
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-bold text-dark">Type <code>DELETE</code> to confirm <span class="text-danger">*</span></label>
+                                                    <input type="text" name="confirm_text" class="form-control" placeholder="DELETE" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label small fw-bold text-dark">Mandatory Justification Reason <span class="text-danger">*</span></label>
+                                                    <textarea name="reason" rows="3" class="form-control" placeholder="e.g. Inappropriate spam / Legal compliance purge..." required></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer border-top bg-light">
+                                                <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-sm btn-danger px-3">Execute Permanent Purge</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <i class="bi bi-check2-circle fs-2 text-success mb-2"></i>
+                            <h6 class="fw-bold">No items in the soft-deleted queue</h6>
+                            <p class="text-muted small mb-0">The data lifecycle queue is clean.</p>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

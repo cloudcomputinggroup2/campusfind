@@ -1,0 +1,76 @@
+{% extends 'admin_portal/base_admin.html' %}
+{% load static %}
+
+{% block title %}System Settings - Admin Portal{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small mb-1 text-muted">
+                <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}" class="text-decoration-none">Admin</a></li>
+                <li class="breadcrumb-item active text-dark" aria-current="page">System Settings</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-0">Platform Settings & Operational Policies</h2>
+    </div>
+</div>
+
+<div class="card border rounded-4 bg-white shadow-sm p-4 p-md-5 mb-4">
+    <div class="mb-4 pb-3 border-bottom">
+        <h5 class="fw-bold text-dark mb-1">Non-Code Operational Parameters</h5>
+        <p class="text-muted small mb-0">Adjust sitewide operational behaviors, broadcast notices, and storage retention windows. Changes are recorded in the audit log.</p>
+    </div>
+
+    <form action="{% url 'admin_system_settings' %}" method="post">
+        {% csrf_token %}
+
+        <div class="row g-4 mb-4">
+            {% for setting in settings_list %}
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded-3 border h-100">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <label class="form-label fw-bold text-dark mb-0 small">{{ setting.key }}</label>
+                            <span class="badge bg-secondary-subtle text-secondary border px-2 py-1" style="font-size: 10px;">{{ setting.category }}</span>
+                        </div>
+                        <p class="text-muted small mb-3">{{ setting.description }}</p>
+
+                        {% if setting.data_type == 'bool' %}
+                            <div class="form-check form-switch pt-1">
+                                <input class="form-check-input" type="checkbox" role="switch" name="{{ setting.key }}" id="id_{{ setting.key }}" {% if setting.get_typed_value %}checked{% endif %}>
+                                <label class="form-check-label small fw-semibold text-dark" for="id_{{ setting.key }}">
+                                    Enable / Active
+                                </label>
+                            </div>
+                        {% elif setting.data_type == 'text' %}
+                            <textarea name="{{ setting.key }}" rows="3" class="form-control form-control-sm">{{ setting.value }}</textarea>
+                        {% elif setting.data_type == 'int' %}
+                            <input type="number" name="{{ setting.key }}" value="{{ setting.value }}" class="form-control form-control-sm">
+                        {% else %}
+                            <input type="text" name="{{ setting.key }}" value="{{ setting.value }}" class="form-control form-control-sm">
+                        {% endif %}
+
+                        <div class="small text-muted mt-2" style="font-size: 10px;">
+                            Last modified: {{ setting.updated_at|date:"M d, Y H:i" }} &bull; By: {{ setting.last_modified_by.username|default:"System" }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Mandatory Reason Capture on Settings Update -->
+        <div class="p-3 bg-white rounded-3 border mb-4">
+            <label class="form-label small fw-bold text-dark">Mandatory Reason for Updating Platform Configuration <span class="text-danger">*</span></label>
+            <input type="text" name="reason" class="form-control" placeholder="e.g. Adjusted broadcast notice for library finals week..." required>
+            <div class="form-text small">All setting adjustments create an immutable entry in the audit trail.</div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary-custom px-4 py-2">
+                <i class="bi bi-check2-circle me-1"></i> Save Configuration Changes
+            </button>
+        </div>
+
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Reported Items - CampusFind{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">My Reported Posts</h2>
+            <p class="text-muted small mb-0">Manage and update the items you have reported across campus</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'item_create' %}" class="btn btn-primary-custom px-3 py-2">
+                <i class="bi bi-plus-circle-fill me-1"></i> Report New Item
+            </a>
+        </div>
+    </div>
+
+    <!-- Personal Stats Counters -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon-wrapper stat-icon-total">
+                    <i class="bi bi-collection"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ user_stats.total }}</div>
+                    <div class="stat-label">Total Posts</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon-wrapper stat-icon-lost">
+                    <i class="bi bi-search"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ user_stats.lost }}</div>
+                    <div class="stat-label">Active Lost</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon-wrapper stat-icon-found">
+                    <i class="bi bi-pin-map-fill"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ user_stats.found }}</div>
+                    <div class="stat-label">Active Found</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon-wrapper stat-icon-claimed">
+                    <i class="bi bi-check2-all"></i>
+                </div>
+                <div>
+                    <div class="stat-number">{{ user_stats.claimed }}</div>
+                    <div class="stat-label">Reunited</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3">
+        <li class="nav-item">
+            <a class="nav-link {% if current_tab == 'all' %}active bg-dark text-white{% else %}bg-light text-dark border{% endif %} rounded-pill px-4 small fw-semibold" href="?tab=all">
+                All ({{ user_stats.total }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_tab == 'lost' %}active bg-dark text-white{% else %}bg-light text-danger border{% endif %} rounded-pill px-4 small fw-semibold" href="?tab=lost">
+                Lost ({{ user_stats.lost }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_tab == 'found' %}active bg-dark text-white{% else %}bg-light text-info border{% endif %} rounded-pill px-4 small fw-semibold" href="?tab=found">
+                Found ({{ user_stats.found }})
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_tab == 'claimed' %}active bg-dark text-white{% else %}bg-light text-success border{% endif %} rounded-pill px-4 small fw-semibold" href="?tab=claimed">
+                Reunited ({{ user_stats.claimed }})
+            </a>
+        </li>
+    </ul>
+
+    <!-- Items Listing -->
+    <div class="table-custom mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Item Details</th>
+                        <th>Status</th>
+                        <th>Category</th>
+                        <th>Campus Location</th>
+                        <th>Date Reported</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    {% if item.image %}
+                                        <img src="{{ item.image.url }}" alt="{{ item.title }}" class="rounded-3 border" style="width: 50px; height: 50px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-3 bg-light d-flex align-items-center justify-content-center text-muted border" style="width: 50px; height: 50px;">
+                                            <i class="bi {{ item.category_icon }} fs-4"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <a href="{{ item.get_absolute_url }}" class="fw-bold text-dark text-decoration-none">
+                                            {{ item.title }}
+                                        </a>
+                                        <div class="text-muted small">{{ item.description|truncatechars:45 }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge-status {{ item.status_badge_class }}">
+                                    {{ item.get_status_display }}
+                                </span>
+                            </td>
+                            <td><span class="small text-secondary">{{ item.get_category_display|truncatechars:24 }}</span></td>
+                            <td><i class="bi bi-geo-alt text-muted me-1"></i><span class="small">{{ item.location }}</span></td>
+                            <td><span class="small text-muted">{{ item.created_at|date:"M d, Y" }}</span></td>
+                            <td class="text-end pe-4">
+                                <div class="d-inline-flex align-items-center gap-1">
+                                    <!-- Toggle Claimed Status -->
+                                    <form action="{% url 'item_toggle_status' pk=item.pk %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        {% if item.status == 'CLAIMED' %}
+                                            <input type="hidden" name="action" value="reopen">
+                                            <button type="submit" class="btn btn-sm btn-outline-warning rounded-pill px-2" title="Reopen post">
+                                                Reopen
+                                            </button>
+                                        {% else %}
+                                            <input type="hidden" name="action" value="claim">
+                                            <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-2" title="Mark as Claimed/Reunited">
+                                                <i class="bi bi-check2"></i> Mark Claimed
+                                            </button>
+                                        {% endif %}
+                                    </form>
+
+                                    <!-- View Details -->
+                                    <a href="{{ item.get_absolute_url }}" class="btn btn-sm btn-light border rounded-pill px-2" title="View details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    <!-- Edit -->
+                                    <a href="{% url 'item_update' pk=item.pk %}" class="btn btn-sm btn-light border rounded-pill px-2" title="Edit post">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+
+                                    <!-- Delete -->
+                                    <a href="{% url 'item_delete' pk=item.pk %}" class="btn btn-sm btn-light border text-danger rounded-pill px-2" title="Delete post">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
+                                    <i class="bi bi-inbox fs-3 text-muted"></i>
+                                </div>
+                                <h6 class="fw-bold">No Items in this tab</h6>
+                                <p class="text-muted small mb-3">You have not reported any items matching this tab filter yet.</p>
+                                <a href="{% url 'item_create' %}" class="btn btn-primary-custom btn-sm rounded-pill px-3">Report an Item Now</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

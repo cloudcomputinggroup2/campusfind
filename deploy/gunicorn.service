@@ -1,0 +1,21 @@
+[Unit]
+Description=Gunicorn daemon for CampusFind Django Application
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/campusfind
+EnvironmentFile=/home/ubuntu/campusfind/.env
+ExecStart=/home/ubuntu/campusfind/venv/bin/gunicorn \
+          --access-logfile - \
+          --error-logfile - \
+          --workers 3 \
+          --bind 127.0.0.1:8000 \
+          campusfind.wsgi:application
+
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,34 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if title %}{{ title }} | {% endif %}CampusFind Admin Portal{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <!-- Bootstrap Icons & Fonts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{% static 'css/admin_custom.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div class="cf-admin-branding">
+    <h1 id="site-name" class="cf-admin-site-name">
+        <a href="{% url 'admin:index' %}" class="cf-admin-site-link">
+            <i class="bi bi-compass-fill cf-admin-site-icon"></i>
+            <span>Campus<span class="cf-admin-site-highlight">Find</span></span>
+        </a>
+    </h1>
+    <span class="cf-admin-badge">Admin Portal</span>
+</div>
+{% endblock %}
+
+{% block nav-global %}
+<div class="cf-admin-global-nav">
+    <a href="{% url 'home' %}" target="_blank" class="cf-admin-nav-link">
+        <i class="bi bi-box-arrow-up-right"></i> View Campus Site
+    </a>
+    <a href="{% url 'moderator_dashboard' %}" class="cf-admin-nav-link cf-admin-nav-link-staff">
+        <i class="bi bi-shield-check"></i> Staff Dashboard
+    </a>
+</div>
+{% endblock %}

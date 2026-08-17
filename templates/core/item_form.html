@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - CampusFind{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb small text-muted">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'item_list' %}" class="text-decoration-none">Directory</a></li>
+                    <li class="breadcrumb-item active text-dark" aria-current="page">{{ page_title }}</li>
+                </ol>
+            </nav>
+
+            <div class="card border rounded-4 p-4 p-md-5 bg-white shadow-sm">
+                
+                <div class="text-center mb-4">
+                    <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-2 border" style="width: 52px; height: 52px; font-size: 1.4rem; color: var(--brand-primary);">
+                        <i class="bi {% if is_edit %}bi-pencil-square{% else %}bi-plus-circle-fill{% endif %}"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">{{ page_title }}</h3>
+                    <p class="text-muted small">Provide clear details to help reconnect the item with its owner.</p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger rounded-3 small">
+                            {% for error in form.non_field_errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Post Status (Lost vs Found) -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Listing Type <span class="text-danger">*</span></label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                            <div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text small text-muted">Select whether this is an item you lost, or an item you found.</div>
+                    </div>
+
+                    <!-- Item Title -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Item Title / Headline <span class="text-danger">*</span></label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text small text-muted">Use a concise, descriptive title (e.g. "Space Grey MacBook Air M2 in Black Sleeve").</div>
+                    </div>
+
+                    <!-- Category & Date Grid -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Category <span class="text-danger">*</span></label>
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                                <div class="text-danger small mt-1">{{ form.category.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-dark">Date Lost or Found <span class="text-danger">*</span></label>
+                            {{ form.date_event }}
+                            {% if form.date_event.errors %}
+                                <div class="text-danger small mt-1">{{ form.date_event.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Campus Location -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Campus Location <span class="text-danger">*</span></label>
+                        {{ form.location }}
+                        <datalist id="location-presets">
+                            {% for loc in LOCATION_PRESETS %}
+                                <option value="{{ loc }}">
+                            {% endfor %}
+                        </datalist>
+                        {% if form.location.errors %}
+                            <div class="text-danger small mt-1">{{ form.location.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text small text-muted">Select from campus landmarks or type the exact room/building.</div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Detailed Description <span class="text-danger">*</span></label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text small text-muted">Include colors, brand, serial numbers (partial), distinctive marks, or contents.</div>
+                    </div>
+
+                    <!-- Contact Details -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark">Contact Information <span class="text-danger">*</span></label>
+                        {{ form.contact }}
+                        {% if form.contact.errors %}
+                            <div class="text-danger small mt-1">{{ form.contact.errors.0 }}</div>
+                        {% endif %}
+                        <div class="form-text small text-muted">How can someone reach you? (Phone number, student email, or campus office).</div>
+                    </div>
+
+                    <!-- Image Upload with Live Preview -->
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark">Item Photo (Optional)</label>
+                        
+                        <div class="preview-container mb-2" onclick="document.getElementById('item-image-input').click();">
+                            <div id="image-placeholder-text">
+                                <i class="bi bi-cloud-arrow-up fs-2 text-secondary"></i>
+                                <div class="fw-semibold text-dark mt-2 small">Click to browse or drop an image</div>
+                                <div class="text-muted small">PNG, JPG, JPEG, WEBP (Max 5MB) &bull; Stored in Amazon S3</div>
+                            </div>
+                            <img id="image-preview-img" src="{% if item and item.image %}{{ item.image.url }}{% endif %}" alt="Preview" class="image-preview-img {% if not item or not item.image %}d-none{% endif %}">
+                        </div>
+
+                        {{ form.image }}
+                        {% if form.image.errors %}
+                            <div class="text-danger small mt-1">{{ form.image.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Submit & Cancel Buttons -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <a href="{% if is_edit %}{% url 'item_detail' pk=item.pk %}{% else %}{% url 'home' %}{% endif %}" class="btn btn-sm btn-light border rounded-3 px-4">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary-custom px-4 py-2">
+                            {% if is_edit %}Save Changes{% else %}Publish Listing{% endif %}
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

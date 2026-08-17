@@ -1,0 +1,32 @@
+# Git ignore file for CampusFind Capstone Project
+
+# Python & Environment
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.env
+
+# Database
+*.sqlite3
+*.db
+
+# Static & Media uploads (generated at runtime / S3)
+staticfiles/
+media/
+!media/.gitkeep
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

@@ -1,0 +1,170 @@
+{% extends 'admin_portal/base_admin.html' %}
+{% load static %}
+
+{% block title %}Audit Trail & Compliance - Admin Portal{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small mb-1 text-muted">
+                <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}" class="text-decoration-none">Admin</a></li>
+                <li class="breadcrumb-item active text-dark" aria-current="page">Audit Trail</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-0">Immutable Audit & Traceability Log</h2>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'admin_audit_export_csv' %}" class="btn btn-sm btn-outline-secondary rounded-3 px-3">
+            <i class="bi bi-file-earmark-spreadsheet me-1 text-success"></i> Export CSV Report
+        </a>
+    </div>
+</div>
+
+<!-- Filters Bar -->
+<div class="card border rounded-4 mb-4 p-3 bg-white shadow-sm">
+    <form action="{% url 'admin_audit_logs' %}" method="get" id="auditFilterForm">
+        <div class="row g-3 align-items-center">
+            
+            <div class="col-lg-4">
+                <label class="form-label small fw-bold text-muted mb-1">Search Logs</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" value="{{ query_q }}" class="form-control border-start-0 ps-0" placeholder="Target name, reason, model...">
+                </div>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <label class="form-label small fw-bold text-muted mb-1">Action Type</label>
+                <select name="action" class="form-select" onchange="document.getElementById('auditFilterForm').submit();">
+                    <option value="">All Action Types</option>
+                    {% for code, label in action_choices %}
+                        <option value="{{ code }}" {% if selected_action == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4 col-lg-3">
+                <label class="form-label small fw-bold text-muted mb-1">Filter by Actor Username</label>
+                <input type="text" name="actor" value="{{ actor_q }}" class="form-control" placeholder="e.g. admin">
+            </div>
+
+            <div class="col-md-4 col-lg-2 d-flex align-items-end gap-2 pt-4">
+                <button type="submit" class="btn btn-sm btn-dark px-3 rounded-3 flex-grow-1">
+                    Filter
+                </button>
+                {% if query_q or selected_action or actor_q %}
+                    <a href="{% url 'admin_audit_logs' %}" class="btn btn-sm btn-light border text-muted rounded-3" title="Clear filters">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                {% endif %}
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<!-- Audit Log Table -->
+<div class="table-custom mb-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 small">
+            <thead>
+                <tr>
+                    <th class="ps-4">Timestamp</th>
+                    <th>Actor</th>
+                    <th>Action Type</th>
+                    <th>Target Object</th>
+                    <th>Mandatory Reason</th>
+                    <th>IP Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td class="ps-4 py-3 text-muted" style="white-space: nowrap;">
+                            {{ log.timestamp|date:"M d, Y" }}<br>
+                            <span style="font-size: 11px;">{{ log.timestamp|date:"H:i:s" }} UTC</span>
+                        </td>
+                        <td>
+                            {% if log.actor %}
+                                <a href="{% url 'admin_user_detail' user_id=log.actor.id %}" class="fw-bold text-dark text-decoration-none">
+                                    {{ log.actor.username }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">System</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-dark text-white px-2 py-1">
+                                {{ log.get_action_type_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="fw-bold text-dark">{{ log.target_repr|default:log.target_model }}</span>
+                            {% if log.target_model %}<div class="text-muted" style="font-size: 11px;">Model: {{ log.target_model }} #{{ log.target_id }}</div>{% endif %}
+                        </td>
+                        <td>
+                            <span class="text-secondary">{{ log.reason }}</span>
+                            {% if log.details %}
+                                <div class="mt-1">
+                                    <button class="btn btn-sm btn-light border py-0 px-2 text-muted" type="button" data-bs-toggle="collapse" data-bs-target="#details-{{ log.id }}" style="font-size: 10px;">
+                                        <i class="bi bi-code-slash me-1"></i> Details
+                                    </button>
+                                    <div class="collapse mt-1" id="details-{{ log.id }}">
+                                        <pre class="bg-light p-2 rounded border small mb-0" style="font-size: 10px;">{{ log.details }}</pre>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td><span class="text-muted" style="font-size: 11px;">{{ log.ip_address|default:"Localhost" }}</span></td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <i class="bi bi-clock-history fs-2 text-muted mb-2"></i>
+                            <h6 class="fw-bold">No audit records found</h6>
+                            <p class="text-muted small mb-0">Try changing your search parameters or filter criteria.</p>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if logs.has_other_pages %}
+    <nav aria-label="Audit pagination" class="d-flex justify-content-center my-4">
+        <ul class="pagination pagination-sm">
+            {% if logs.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ logs.previous_page_number }}{% if query_q %}&q={{ query_q }}{% endif %}{% if selected_action %}&action={{ selected_action }}{% endif %}{% if actor_q %}&actor={{ actor_q }}{% endif %}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i></span></li>
+            {% endif %}
+
+            {% for p in logs.paginator.page_range %}
+                {% if logs.number == p %}
+                    <li class="page-item active"><span class="page-link bg-dark border-dark">{{ p }}</span></li>
+                {% elif p > logs.number|add:"-3" and p < logs.number|add:"3" %}
+                    <li class="page-item"><a class="page-link text-dark" href="?page={{ p }}{% if query_q %}&q={{ query_q }}{% endif %}{% if selected_action %}&action={{ selected_action }}{% endif %}{% if actor_q %}&actor={{ actor_q }}{% endif %}">{{ p }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if logs.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ logs.next_page_number }}{% if query_q %}&q={{ query_q }}{% endif %}{% if selected_action %}&action={{ selected_action }}{% endif %}{% if actor_q %}&actor={{ actor_q }}{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right"></i></span></li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+
+{% endblock %}
