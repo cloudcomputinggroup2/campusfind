@@ -474,7 +474,22 @@ def create_deployment_proof_docx():
 
     # 1. Project Reference & Cloud Metadata Table
     format_heading(doc, "1. Project Reference & Cloud Infrastructure Metadata", level=1)
-    table_meta = doc.add_table(rows=8, cols=2)
+
+    metadata = [
+        ("GitHub Repository URL", "https://github.com/cloudcomputinggroup2/campusfind.git"),
+        ("Live Web Application URL", "http://56.228.41.189/"),
+        ("Cloud Telemetry Endpoint", "http://56.228.41.189/health/"),
+        ("AWS Deployment Region", "eu-north-1 (Europe - Stockholm)"),
+        ("Compute Instance (Amazon EC2)", "i-09e746740d3fa087e (Ubuntu 24.04 LTS, t4g.micro)"),
+        ("Managed Database (Amazon RDS)", "campusfind-db.cfmc4qqmmeqe.eu-north-1.rds.amazonaws.com:5432 (PostgreSQL 15)"),
+        ("Object Storage (Amazon S3)", "campusfind-item-images-444158822918 (Decoupled S3 bucket)"),
+        ("IAM Access Management", "campusfind-s3-user (Least-privilege S3 CRUD policy)"),
+        ("Security Groups", "EC2-SG: sg-0a5bfe64068a5c6d0 | RDS-SG: sg-05d0947a3de6e234e"),
+        ("Web Server & WSGI Daemon", "Nginx 1.24+ (Reverse Proxy) + Gunicorn 26+ (Systemd daemon)"),
+        ("Automated Testing Validation", "15/15 Automated Unit & Integration Tests Passed (100% OK)"),
+    ]
+
+    table_meta = doc.add_table(rows=len(metadata) + 1, cols=2)
     table_meta.alignment = WD_TABLE_ALIGNMENT.CENTER
     set_table_borders(table_meta)
 
@@ -488,16 +503,6 @@ def create_deployment_proof_docx():
         r.font.bold = True
         r.font.size = Pt(9)
         r.font.color.rgb = RGBColor(255, 255, 255)
-
-    metadata = [
-        ("GitHub Repository URL", "https://github.com/cloudcomputinggroup2/campusfind.git"),
-        ("AWS Deployment Region", "us-east-1 (US East - N. Virginia)"),
-        ("Compute Instance (EC2)", "Ubuntu Server 24.04 LTS (t2.micro / t3.micro Free Tier)"),
-        ("Managed Relational DB (RDS)", "Amazon RDS PostgreSQL 15 (Single-AZ, db.t3.micro)"),
-        ("Object Storage (S3)", "campusfind-item-images-capstone (Decoupled media assets)"),
-        ("Web Server / WSGI Daemon", "Nginx 1.24+ (Reverse Proxy) + Gunicorn 21+ (Systemd Service)"),
-        ("Health & Monitoring", "/health/ JSON Telemetry + Amazon CloudWatch CPU/Network Alarms"),
-    ]
 
     for row_idx, data in enumerate(metadata, start=1):
         bg = BG_LIGHT_HEX if row_idx % 2 == 1 else "FFFFFF"
