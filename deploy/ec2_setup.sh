@@ -47,6 +47,8 @@ fi
 echo "Running migrations and static collection..."
 python manage.py migrate
 python manage.py collectstatic --noinput
+sudo chmod 755 /home/ubuntu
+sudo chmod -R 755 "$APP_DIR/staticfiles"
 
 # 8. Seed sample data
 echo "Seeding sample database records..."
