@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusFind - Individual Video Presentation Slides & Scripts</title>
+  <style>
+    :root {
+      --bg-dark: #0B1120;
+      --bg-card: #1E293B;
+      --border-color: #334155;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --primary-blue: #3B82F6;
+      --accent-cyan: #06B6D4;
+      --accent-emerald: #10B981;
+      --accent-amber: #F59E0B;
+      --accent-rose: #F43F5E;
+      --accent-purple: #8B5CF6;
+      --aws-orange: #FF9900;
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* Top Role Selector Tabs */
+    .role-tabs-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: #090E1A;
+      border-bottom: 1px solid var(--border-color);
+      overflow-x: auto;
+      white-space: nowrap;
+      z-index: 100;
+    }
+    .role-tabs-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-cyan);
+      margin-right: 8px;
+    }
+    .role-tab {
+      background: #1E293B;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .role-tab:hover {
+      background: #334155;
+      color: white;
+    }
+    .role-tab.active {
+      background: var(--primary-blue);
+      border-color: var(--primary-blue);
+      color: white;
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Presentation Header */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: rgba(15, 23, 42, 0.85);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 90;
+    }
+    .role-header-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .role-badge {
+      background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+      color: white;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+    .role-title-text {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .timer-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #0F172A;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      font-family: monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+    .timer-box.warning { color: var(--accent-amber); border-color: var(--accent-amber); }
+    .timer-box.danger { color: var(--accent-rose); border-color: var(--accent-rose); animation: pulse 1s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    button.btn {
+      background: #1E293B;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    button.btn:hover { background: #334155; border-color: var(--primary-blue); }
+    button.btn.active { background: var(--primary-blue); border-color: var(--primary-blue); color: white; }
+
+    /* Deck Stage */
+    .deck-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 24px;
+    }
+
+    .slide {
+      position: absolute;
+      width: 95%;
+      max-width: 1400px;
+      height: 94%;
+      max-height: 820px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 30px 40px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transform: scale(0.96) translateX(40px);
+      pointer-events: none;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: scale(1) translateX(0);
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    /* Slide Header */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 12px;
+    }
+    .slide-category {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+    .slide-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      background: linear-gradient(135deg, #FFFFFF 60%, #94A3B8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .slide-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+    .slide-counter-badge {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.6);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Slide Layouts */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 100%; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; height: 100%; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+    /* Cards */
+    .card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card p, .card li { color: #CBD5E1; font-size: 0.92rem; line-height: 1.5; }
+    .card ul { padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+
+    .card.blue { border-left: 4px solid var(--primary-blue); }
+    .card.cyan { border-left: 4px solid var(--accent-cyan); }
+    .card.emerald { border-left: 4px solid var(--accent-emerald); }
+    .card.amber { border-left: 4px solid var(--accent-amber); }
+    .card.rose { border-left: 4px solid var(--accent-rose); }
+    .card.purple { border-left: 4px solid var(--accent-purple); }
+    .card.aws { border-left: 4px solid var(--aws-orange); }
+
+    /* UI Mockup Card */
+    .ui-mockup-card {
+      background: #0F172A;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .ui-mockup-header {
+      background: #1E293B;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #334155;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #E2E8F0;
+    }
+    .ui-mockup-dots {
+      display: flex;
+      gap: 5px;
+    }
+    .ui-mockup-dots span {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .ui-mockup-content {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.88rem;
+    }
+
+    /* Tear-off slip preview */
+    .tear-off-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .tear-off-slip {
+      background: #090D16;
+      border: 1px dashed #64748B;
+      border-top: 2px solid var(--accent-amber);
+      padding: 8px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: #CBD5E1;
+      border-radius: 4px;
+    }
+
+    /* Table */
+    table.slide-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    table.slide-table th {
+      background: #1E293B;
+      color: #F8FAFC;
+      text-align: left;
+      padding: 8px 12px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-color);
+    }
+    table.slide-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      color: #CBD5E1;
+    }
+
+    pre.code-block {
+      background: #090D16;
+      border: 1px solid #1E293B;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: #38BDF8;
+      overflow-x: auto;
+    }
+
+    .diagram-box {
+      background: #0F172A;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      overflow: hidden;
+    }
+    .diagram-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+    /* Teleprompter / Speaker Notes Panel */
+    .teleprompter-drawer {
+      position: fixed;
+      bottom: 56px;
+      left: 20px;
+      right: 20px;
+      height: 200px;
+      background: rgba(11, 17, 32, 0.96);
+      border: 1px solid var(--primary-blue);
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
+      z-index: 95;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .teleprompter-drawer.open { display: flex; }
+    .prompter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+    .prompter-body {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 1.02rem;
+      line-height: 1.6;
+      color: #F1F5F9;
+    }
+    .prompter-body strong { color: var(--accent-amber); }
+
+    /* Bottom Bar */
+    .bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background: rgba(15, 23, 42, 0.9);
+      border-top: 1px solid var(--border-color);
+      z-index: 90;
+    }
+    .nav-controls { display: flex; align-items: center; gap: 10px; }
+
+    @media print {
+      .role-tabs-bar, .top-bar, .bottom-bar, .teleprompter-drawer { display: none !important; }
+      body { overflow: visible; background: white !important; color: black !important; }
+      .deck-container { display: block; padding: 0; }
+      .slide { position: relative !important; display: flex !important; opacity: 1 !important; transform: none !important; page-break-after: always; height: 100vh !important; width: 100% !important; background: white !important; color: black !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Role Navigation Tabs -->
+  <nav class="role-tabs-bar">
+    <span class="role-tabs-label">Select Your Role:</span>
+    <button class="role-tab active" data-role-id="1">👑 1. Team Lead / PM</button>
+    <button class="role-tab" data-role-id="2">🎨 2. Frontend UI Lead</button>
+    <button class="role-tab" data-role-id="3">⚙️ 3. Backend Developer</button>
+    <button class="role-tab" data-role-id="4">☁️ 4. Cloud Architect</button>
+    <button class="role-tab" data-role-id="5">🗄️ 5. Database Lead</button>
+    <button class="role-tab" data-role-id="6">🔐 6. Storage & Security</button>
+    <button class="role-tab" data-role-id="7">🧪 7. QA & Docs Lead</button>
+  </nav>
+
+  <!-- Presentation Header -->
+  <header class="top-bar">
+    <div class="role-header-info">
+      <span class="role-badge" id="activeRoleBadge">Role 1: Team Lead</span>
+      <span class="role-title-text" id="activeRoleTitle">Project Vision & Governance</span>
+      <span style="font-size: 0.85rem; color: var(--text-muted);" id="roleTargetTime">Target: 2.5 min</span>
+    </div>
+
+    <div class="top-actions">
+      <div class="timer-box" id="roleTimer">00:00</div>
+      <button class="btn" id="timerBtn" title="Start/Stop Video Recording Timer">⏱️ Record Timer</button>
+      <button class="btn" id="resetTimerBtn" title="Reset Timer">🔄</button>
+      <button class="btn" id="teleprompterBtn" title="Toggle Teleprompter Script (Hotkey: N)">🎙️ Script Notes</button>
+      <button class="btn" id="fullscreenBtn" title="Fullscreen (Hotkey: F)">⛶ Fullscreen</button>
+      <button class="btn" onclick="window.print()" title="Print / PDF Export (Hotkey: P)">🖨️ PDF</button>
+    </div>
+  </header>
+
+  <!-- Main Slide Deck Stage -->
+  <main class="deck-container" id="deckContainer">
+
+    <!-- ==================== ROLE 1: TEAM LEAD / PM ==================== -->
+    <section class="slide active" data-role="1" data-slide="1" data-script="Hello Professor and evaluators. My name is [Your Name], and I am the Team Lead and Project Manager for our CSBC 252 Capstone Project: CampusFind: A Cloud-Based Campus Lost & Found System. Our project is a production-grade, cloud-native web application built using Django, Bootstrap, and deployed on Amazon Web Services using Free Tier infrastructure: Amazon EC2, Amazon RDS PostgreSQL, Amazon S3, AWS IAM, and Amazon CloudWatch.">
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; gap: 16px;">
+        <div style="font-size: 3.5rem;">🧭</div>
+        <h1 style="font-size: 2.8rem; font-weight: 900; background: linear-gradient(135deg, #FFFFFF, #60A5FA); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CampusFind</h1>
+        <p style="font-size: 1.25rem; color: #94A3B8; max-width: 800px;">A Resilient, Cloud-Native Campus Lost & Found System on AWS Free Tier</p>
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">🎓 CSBC 252: Intro to Cloud Computing</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">👑 Speaker: Team Lead / Project Manager</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">⏱️ Time: 2:00 – 2:30 Min</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="1" data-slide="2" data-script="On any university campus, students and faculty lose valuable personal items every single day—ranging from student IDs and dorm keys to expensive laptops and textbooks. Traditionally, recovery efforts rely on fragmented WhatsApp group chats, physical bulletin boards, or word of mouth. This creates immense friction: there is no central search, no category filtering, records are never updated when items are found, and personal phone numbers are broadcast publicly. CampusFind replaces this with a unified, searchable single source of truth.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Problem Space</span>
+          <h2 class="slide-title">Campus Lost Property Dilemma</h2>
+          <p class="slide-subtitle">Why traditional physical boards and chat groups fail on modern university campuses</p>
+        </div>
+        <span class="slide-counter-badge">Slide 2 / 5</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card rose">
+            <div class="card-title"><span class="icon">❌</span> Traditional Failures</div>
+            <ul>
+              <li><strong>Scattered Channels:</strong> Inquiries lost in noisy WhatsApp and social groups.</li>
+              <li><strong>Zero Search / Indexing:</strong> Impossible to filter by building, date, or category.</li>
+              <li><strong>Obsolete Listings:</strong> Notice boards never updated once items are recovered.</li>
+              <li><strong>Privacy Risks:</strong> Students broadcast personal phone numbers publicly.</li>
+            </ul>
+          </div>
+          <div class="card emerald">
+            <div class="card-title"><span class="icon">✅</span> The CampusFind Cloud Paradigm</div>
+            <ul>
+              <li><strong>Centralized Single Source of Truth:</strong> One unified campus repository.</li>
+              <li><strong>Multi-Attribute Indexing:</strong> Real-time filtering by category, status, and building.</li>
+              <li><strong>Verified Lifecycle:</strong> 1-click status update to 'Claimed/Reunited'.</li>
+              <li><strong>Role-Based Governance:</strong> Authenticated access and safe contact links.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="1" data-slide="3" data-script="To ensure delivery within our 3-day sprint timeline, we established strict scope boundaries. In scope: full CRUD operations, S3-backed image uploads, Amazon RDS PostgreSQL persistence, printable notice flyers, staff moderation, and our dedicated /ops/ admin operations portal. Intentionally out of scope: complex peer-to-peer chat (we use direct phone/email contact links to prevent spam and protect privacy) and monetary bounty gateways.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Project Governance</span>
+          <h2 class="slide-title">Project Objectives & Scope Control</h2>
+          <p class="slide-subtitle">Clear technical milestones within the 3-day development timeline</p>
+        </div>
+        <span class="slide-counter-badge">Slide 3 / 5</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card blue">
+            <div class="card-title"><span class="icon">🎯</span> Core Technical Objectives</div>
+            <ul>
+              <li><strong>Full CRUD Application:</strong> Responsive UI for lost/found item workflows.</li>
+              <li><strong>Decoupled Media Storage:</strong> Upload images directly to Amazon S3.</li>
+              <li><strong>Managed Cloud Database:</strong> Provision Amazon RDS in private DB subnet.</li>
+              <li><strong>Least-Privilege Security:</strong> IAM policies and Security Groups isolation.</li>
+              <li><strong>Automated Telemetry:</strong> Test runner + CloudWatch metrics monitoring.</li>
+            </ul>
+          </div>
+          <div class="card amber">
+            <div class="card-title"><span class="icon">🛡️</span> Scope Boundaries (Sprint Control)</div>
+            <ul>
+              <li><strong style="color:#34D399;">IN SCOPE:</strong> Dual-view directory, Print notice flyer generator, Staff moderation dashboard, Dedicated Admin Operations hub (<code>/ops/</code>).</li>
+              <li><strong style="color:#F87171;">OUT OF SCOPE:</strong> Real-time P2P chat (direct contact links used to protect privacy).</li>
+              <li><strong style="color:#F87171;">OUT OF SCOPE:</strong> Monetary payment bounties.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="1" data-slide="4" data-script="Our project was divided across 7 specialized engineering domains: Frontend, Backend, Cloud Architecture, Database, Storage & Security, and Quality Assurance. Each team member had dedicated ownership of specific files, AWS resources, and presentation segments. I will now hand over to our Frontend Lead to walk you through our user interface and visual workflows.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Team Structure</span>
+          <h2 class="slide-title">Engineering Roles & Responsibilities</h2>
+          <p class="slide-subtitle">Clear division of engineering domains and file deliverables</p>
+        </div>
+        <span class="slide-counter-badge">Slide 4 / 5</span>
+      </div>
+      <div class="slide-body">
+        <table class="slide-table">
+          <thead>
+            <tr><th>Role</th><th>Primary Domain</th><th>Core AWS / Tech</th><th>Key Deliverables</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>1. Team Lead / PM</strong></td><td>Governance, Proposal, Coordination</td><td>AWS Overview, GitHub</td><td><code>01_PROJECT_PROPOSAL.md</code></td></tr>
+            <tr><td><strong>2. Frontend UI Lead</strong></td><td>Bootstrap 5.3 UI, Responsive Templates</td><td>HTML5, JS, CSS</td><td><code>templates/</code>, <code>main.js</code></td></tr>
+            <tr><td><strong>3. Backend Developer</strong></td><td>Django Models, Views, <code>/ops/</code> Portal</td><td>Python 3.12, Django 5.0</td><td><code>core/models.py</code>, <code>views.py</code></td></tr>
+            <tr><td><strong>4. Cloud Architect</strong></td><td>EC2 Ubuntu Provisioning, Nginx Proxy</td><td>EC2, Gunicorn, Nginx</td><td><code>ec2_setup.sh</code>, <code>nginx.conf</code></td></tr>
+            <tr><td><strong>5. Database Lead</strong></td><td>3NF Schema, RDS PostgreSQL Setup</td><td>Amazon RDS, Migrations</td><td><code>seed_data.py</code>, ERD</td></tr>
+            <tr><td><strong>6. Storage & Security</strong></td><td>S3 Bucket, IAM Least Privilege, .env</td><td>Amazon S3, AWS IAM</td><td><code>iam_policy.json</code>, <code>.env</code></td></tr>
+            <tr><td><strong>7. QA & Docs Lead</strong></td><td>Automated Tests, CloudWatch, Report</td><td>Django Test, CloudWatch</td><td><code>core/tests.py</code>, Report</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide" data-role="1" data-slide="5" data-script="In summary, CampusFind demonstrates a resilient, cloud-native architecture built within AWS Free Tier limits. I will now let our team members present their individual technical implementations. Thank you!">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Cloud Overview</span>
+          <h2 class="slide-title">High-Level AWS Solution Topology</h2>
+          <p class="slide-subtitle">Multi-tier decoupled architecture: EC2, RDS, S3, IAM & CloudWatch</p>
+        </div>
+        <span class="slide-counter-badge">Slide 5 / 5</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="diagram-box">
+            <img src="../diagrams/aws_architecture.png" alt="AWS Architecture Diagram">
+          </div>
+          <div class="card aws">
+            <div class="card-title"><span class="icon">☁️</span> Architecture Summary</div>
+            <ul>
+              <li><strong>Compute:</strong> Amazon EC2 running Nginx + Gunicorn.</li>
+              <li><strong>Database:</strong> Amazon RDS PostgreSQL in private DB subnet.</li>
+              <li><strong>Storage:</strong> Decoupled Amazon S3 for media uploads.</li>
+              <li><strong>Security:</strong> Scoped IAM policy and Security Groups.</li>
+              <li><strong>Monitoring:</strong> Amazon CloudWatch telemetry.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ROLE 2: FRONTEND DEVELOPER ==================== -->
+    <section class="slide" data-role="2" data-slide="1" data-script="Hello, my name is [Your Name], and I served as the Frontend Developer and UI Lead for CampusFind. My responsibility was designing and implementing an intuitive, accessible, and fully responsive user interface using HTML5, Bootstrap 5.3, custom CSS design tokens, and lightweight vanilla JavaScript. Key frontend features include real-time hero metric counters, a dual-mode catalog (Card Grid vs Table Directory), client-side image upload previews with 5MB validation in main.js, and one-click contact copying.">
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; gap: 16px;">
+        <div style="font-size: 3.5rem;">🎨</div>
+        <h1 style="font-size: 2.6rem; font-weight: 900; background: linear-gradient(135deg, #FFFFFF, #38BDF8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Frontend UI & User Experience</h1>
+        <p style="font-size: 1.2rem; color: #94A3B8; max-width: 800px;">Responsive HTML5 Templates, Bootstrap 5.3, Dynamic JS & Printable Notice Flyers</p>
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">🎨 Role: Frontend Developer / UI Lead</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">📁 Files: templates/, styles.css, main.js</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">⏱️ Time: 3:00 – 4:00 Min</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="2" data-slide="2" data-script="Here is our complete UI Navigation Workflow diagram. The user journey starts at the Homepage with live metrics and search bar, moves to the Browse Directory where users can filter by category or toggle Card vs Table views, leads to the Item Detail page with campus safety guidance and the Printable Notice Flyer, supports Item Reporting with client-side image preview, provides My Posts for ownership resolution, and connects administrators to the /ops/ portal.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">UI Architecture Diagram</span>
+          <h2 class="slide-title">CampusFind UI & Navigation Workflow</h2>
+          <p class="slide-subtitle">End-to-end interface flow from discovery to reporting, physical flyers, and resolution</p>
+        </div>
+        <span class="slide-counter-badge">Slide 2 / 5</span>
+      </div>
+      <div class="slide-body">
+        <div class="diagram-box" style="height: 480px;">
+          <img src="../diagrams/ui_wireframe_flow.png" alt="UI Wireframe and Workflow Diagram">
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="2" data-slide="3" data-script="Let's look at the core user interface screens shown here. On the top-left, our Homepage features live metric counters and quick search chips. On the top-right, the Item Submission form features campus building dropdowns and instant client-side photo previews in main.js with 5MB validation. On the bottom, our Browse Directory supports a 1-click toggle between a modern visual Card Grid and a dense Table View for rapid searching.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">UI Mockups & Screens</span>
+          <h2 class="slide-title">Core Application Screens & Dual View</h2>
+          <p class="slide-subtitle">Responsive layouts engineered for discovery, submission, and rapid catalog scanning</p>
+        </div>
+        <span class="slide-counter-badge">Slide 3 / 5</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="ui-mockup-card">
+            <div class="ui-mockup-header">
+              <div class="ui-mockup-dots">
+                <span style="background:#EF4444;"></span><span style="background:#F59E0B;"></span><span style="background:#10B981;"></span>
+              </div>
+              <span>1. Homepage (/)</span>
+            </div>
+            <div class="ui-mockup-content">
+              <p><strong>Hero Search & Statistics</strong></p>
+              <div style="background:#1E293B; padding:8px; border-radius:6px; font-size:0.8rem;">
+                🔍 <em>Search lost phones, keys, IDs...</em>
+              </div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <span style="background:#3B82F6; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem;">12 Lost</span>
+                <span style="background:#10B981; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem;">18 Found</span>
+                <span style="background:#8B5CF6; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem;">34 Reunited</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="ui-mockup-card">
+            <div class="ui-mockup-header">
+              <div class="ui-mockup-dots">
+                <span style="background:#EF4444;"></span><span style="background:#F59E0B;"></span><span style="background:#10B981;"></span>
+              </div>
+              <span>2. Report Item Form</span>
+            </div>
+            <div class="ui-mockup-content">
+              <p><strong>Client Preview & Validation</strong></p>
+              <div style="background:#1E293B; padding:8px; border-radius:6px; font-size:0.8rem;">
+                📍 Building: Science Complex<br>
+                🏷️ Category: Electronics<br>
+                📷 Photo: <em>instant thumbnail preview</em>
+              </div>
+              <span style="background:rgba(16, 185, 129, 0.2); color:#6EE7B7; border:1px solid #10B981; padding:2px 6px; border-radius:4px; font-size:0.72rem; align-self:flex-start;">
+                ✓ 5MB Limit Enforced
+              </span>
+            </div>
+          </div>
+
+          <div class="ui-mockup-card">
+            <div class="ui-mockup-header">
+              <div class="ui-mockup-dots">
+                <span style="background:#EF4444;"></span><span style="background:#F59E0B;"></span><span style="background:#10B981;"></span>
+              </div>
+              <span>3. Dual Catalog View</span>
+            </div>
+            <div class="ui-mockup-content">
+              <p><strong>Cards Grid vs Table View</strong></p>
+              <div style="background:#1E293B; padding:6px; border-radius:6px; font-size:0.78rem;">
+                [🗂️ Grid View] | [📑 Table View]<br>
+                • MacBook Pro Space Gray<br>
+                • Blue Lanyard with Dorm Keys<br>
+                • Student ID Card (CS Dept)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="2" data-slide="4" data-script="A standout feature I engineered is the Printable Notice Flyer shown here. Recognizing that many students still check physical notice boards across campus, this feature generates a high-contrast print-ready poster formatted with a large photo, description, and 8 vertical tear-off contact slips along the bottom. Students walking past can simply tear off a slip to contact the owner or drop-off desk.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Physical Campus Innovation</span>
+          <h2 class="slide-title">Printable Bulletin Notice Flyer with Tear-Off Slips</h2>
+          <p class="slide-subtitle">Bridging digital listings with physical campus bulletin boards (Library, Dining Hall)</p>
+        </div>
+        <span class="slide-counter-badge">Slide 4 / 5</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="ui-mockup-card">
+            <div class="ui-mockup-header">
+              <span>📄 Printable Notice Poster (/item/&lt;id&gt;/print/)</span>
+              <span style="background:#EF4444; color:white; padding:2px 6px; border-radius:4px; font-size:0.75rem;">LOST ITEM</span>
+            </div>
+            <div class="ui-mockup-content">
+              <div style="background:#1E293B; border:1px solid #475569; padding:10px; border-radius:6px; text-align:center;">
+                <h3 style="color:#F8FAFC; font-size:1.1rem;">MacBook Pro 14" Space Gray</h3>
+                <p style="color:#94A3B8; font-size:0.82rem; margin-top:4px;">Lost at Science & Tech Complex (Lab 302)</p>
+                <div style="background:#0F172A; margin:8px auto; width:120px; height:80px; border-radius:4px; display:flex; align-items:center; justify-content:center; border:1px solid #334155;">
+                  📷 [Item Photo]
+                </div>
+                <p style="font-size:0.8rem; color:#CBD5E1;">Contact: student.alex@campus.edu</p>
+              </div>
+
+              <!-- Tear off slips visual -->
+              <div class="tear-off-container">
+                <div class="tear-off-slip">✂️ MacBook<br>alex@edu</div>
+                <div class="tear-off-slip">✂️ MacBook<br>alex@edu</div>
+                <div class="tear-off-slip">✂️ MacBook<br>alex@edu</div>
+                <div class="tear-off-slip">✂️ MacBook<br>alex@edu</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card amber">
+            <div class="card-title"><span class="icon">✨</span> Physical Flyer Highlights</div>
+            <ul>
+              <li><strong>Print-Specific Stylesheet (<code>@media print</code>):</strong> Strips headers and footers to produce clean paper prints.</li>
+              <li><strong>High-Visibility Formatting:</strong> Crisp black and white contrast for standard campus printers.</li>
+              <li><strong>Tear-Off Convenience:</strong> 8 individual contact slips allow students to take information on the go.</li>
+              <li><strong>Lifecycle Resolution:</strong> From <em>My Posts</em>, the poster can click <em>Mark as Claimed</em> once recovered.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="2" data-slide="5" data-script="Finally, here is our Use Case Diagram showing how our three campus user personas—Students, Staff Moderators, and System Administrators—interact with the platform. This structured design ensures a smooth, accessible experience across all university devices. Thank you!">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Use Case Diagram</span>
+          <h2 class="slide-title">CampusFind System Use Cases & Personas</h2>
+          <p class="slide-subtitle">Clear actor boundary map for students, staff moderators, and administrators</p>
+        </div>
+        <span class="slide-counter-badge">Slide 5 / 5</span>
+      </div>
+      <div class="slide-body">
+        <div class="diagram-box" style="height: 480px;">
+          <img src="../diagrams/use_case_diagram.png" alt="CampusFind Use Case Diagram">
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ROLE 3: BACKEND DEVELOPER ==================== -->
+    <section class="slide" data-role="3" data-slide="1" data-script="Hello, my name is [Your Name], and I was the Backend Developer for CampusFind. My role was implementing the core application logic using Python 3.12 and Django 5.0—including data models, form validations, ownership-based access control, search query filtering, and our custom Administrative Operations Portal.">
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; gap: 16px;">
+        <div style="font-size: 3.5rem;">⚙️</div>
+        <h1 style="font-size: 2.6rem; font-weight: 900; background: linear-gradient(135deg, #FFFFFF, #34D399); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Backend Architecture & Application Logic</h1>
+        <p style="font-size: 1.2rem; color: #94A3B8; max-width: 800px;">Django 5.0, Ownership Access Control, Form Validation & /ops/ Operations Portal</p>
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">⚙️ Role: Backend Developer</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">📁 Files: core/models.py, views.py, forms.py</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">⏱️ Time: 2:30 – 3:00 Min</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="3" data-slide="2" data-script="Let's look at core/models.py: The Item model encapsulates all post attributes: foreign key link to auth_user, category choices, building locations, lifecycle resolution flags, and S3 image keys. We implemented custom model methods like mark_as_claimed(), is_owner(), and status_badge_class to keep views clean. In views.py, we enforce strict ownership authorization: students can only edit, delete, or resolve their own listings. Unauthorized modification requests are blocked at the view layer.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Backend Logic</span>
+          <h2 class="slide-title">Data Models & Ownership Authorization</h2>
+          <p class="slide-subtitle">Encapsulated business logic and server-side permission gates</p>
+        </div>
+        <span class="slide-counter-badge">Slide 2 / 3</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card emerald">
+            <div class="card-title"><span class="icon">📦</span> <code>Item</code> Model Methods</div>
+            <ul>
+              <li><code>mark_as_claimed(user)</code>: Sets <code>status='CLAIMED'</code>, records resolution timestamp.</li>
+              <li><code>is_owner(user)</code>: Validates if requesting user owns the post.</li>
+              <li><code>status_badge_class()</code>: Returns contextual CSS class.</li>
+            </ul>
+          </div>
+          <div class="card blue">
+            <div class="card-title"><span class="icon">🔒</span> View Authorization Gates</div>
+            <ul>
+              <li><strong>Login Required:</strong> Unauthenticated users cannot post or edit.</li>
+              <li><strong>Owner Verification:</strong> Direct URL hacking (e.g. editing post 12) is forbidden unless requester is the poster or staff.</li>
+              <li><strong>5MB Form Ceiling:</strong> <code>ItemForm</code> validates file headers before persistence.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="3" data-slide="3" data-script="To ensure proper platform governance, we built a dedicated /ops/ Admin Portal for staff administrators. Admins can search users, toggle account active status, promote or demote staff moderator roles, and review security alerts. We avoid accidental data loss by utilizing a soft-delete queue first; permanent hard-deletes require mandatory reason logging. All administrative promotions, lockouts, and deletions are recorded in our immutable audit log viewer with timestamps and actor details.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Governance</span>
+          <h2 class="slide-title">Admin Operations Portal (<code>/ops/</code>)</h2>
+          <p class="slide-subtitle">User governance, role management, soft-delete queue, and immutable audit logs</p>
+        </div>
+        <span class="slide-counter-badge">Slide 3 / 3</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card purple">
+            <div class="card-title"><span class="icon">🛡️</span> Role & User Governance</div>
+            <ul>
+              <li><strong>Role Assignment:</strong> Promote students to staff moderators or revoke privileges.</li>
+              <li><strong>Account Lockouts:</strong> Deactivate compromised accounts in one click.</li>
+              <li><strong>Security Summary:</strong> Real-time alerts for failed logins and permission changes.</li>
+            </ul>
+          </div>
+          <div class="card amber">
+            <div class="card-title"><span class="icon">📋</span> Controlled Data Safety</div>
+            <ul>
+              <li><strong>Soft-Delete Queue:</strong> Items marked inactive first; reversible by admin.</li>
+              <li><strong>Hard-Delete Reason Logging:</strong> Permanent deletion requires explicit reason entry.</li>
+              <li><strong>Immutable Audit Trail:</strong> Timestamped log of every sensitive administrative action.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ROLE 4: CLOUD ARCHITECT ==================== -->
+    <section class="slide" data-role="4" data-slide="1" data-script="Hello, my name is [Your Name], and I served as the Cloud Architect and DevOps Lead for CampusFind. My primary objective was designing, provisioning, and securing our multi-tier cloud infrastructure on Amazon Web Services, fully adhering to the AWS Free Tier specifications within the us-east-1 region.">
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; gap: 16px;">
+        <div style="font-size: 3.5rem;">☁️</div>
+        <h1 style="font-size: 2.6rem; font-weight: 900; background: linear-gradient(135deg, #FFFFFF, #F59E0B); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AWS Cloud Architecture & Compute</h1>
+        <p style="font-size: 1.2rem; color: #94A3B8; max-width: 800px;">Multi-Tier VPC, Amazon EC2, Nginx Reverse Proxy, Gunicorn WSGI & Security Groups</p>
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">☁️ Role: Cloud Architect / DevOps</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">📁 Files: deploy/ec2_setup.sh, nginx.conf</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">⏱️ Time: 2:30 – 3:00 Min</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="4" data-slide="2" data-script="Our architecture employs a decoupled, multi-tier topology inside a custom VPC in us-east-1: The Public Subnet hosts our Amazon EC2 instance running Ubuntu Server 24.04 on a t2.micro instance. Nginx 1.24 serves as our front-line reverse proxy on ports 80 and 443, handling SSL termination, static caching, Gzip compression, and proxying dynamic requests to Gunicorn on socket port 8000. The Private Subnet isolates our Amazon RDS database, and S3 handles uploaded media independently.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Cloud Topology</span>
+          <h2 class="slide-title">AWS Multi-Tier VPC Architecture</h2>
+          <p class="slide-subtitle">Decoupled public and private subnets in AWS Region us-east-1</p>
+        </div>
+        <span class="slide-counter-badge">Slide 2 / 4</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="diagram-box">
+            <img src="../diagrams/aws_architecture.png" alt="AWS Architecture Diagram">
+          </div>
+          <div class="card aws">
+            <div class="card-title"><span class="icon">☁️</span> Subnet Decoupling</div>
+            <ul>
+              <li><strong>Public Subnet:</strong> EC2 Web Server (Nginx + Gunicorn).</li>
+              <li><strong>Private Subnet:</strong> Amazon RDS PostgreSQL database.</li>
+              <li><strong>Media Storage:</strong> Amazon S3 bucket (Stateless EC2).</li>
+              <li><strong>Observability:</strong> Amazon CloudWatch telemetry.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="4" data-slide="3" data-script="Here is our compute server configuration: Gunicorn is managed as a resilient systemd daemon (gunicorn.service), ensuring automatic restart on reboot or crash. Nginx handles static file caching and reverse proxying with Gzip compression on ports 80 and 443.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Compute Configuration</span>
+          <h2 class="slide-title">EC2, Nginx & Gunicorn Systemd Daemon</h2>
+          <p class="slide-subtitle">High-performance reverse proxy and daemonized WSGI application server</p>
+        </div>
+        <span class="slide-counter-badge">Slide 3 / 4</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card emerald">
+            <div class="card-title"><span class="icon">⚙️</span> Gunicorn Systemd Unit</div>
+            <pre class="code-block">[Unit]
+Description=Gunicorn WSGI daemon for CampusFind
+After=network.target
+
+[Service]
+User=ubuntu
+Group=www-data
+WorkingDirectory=/home/ubuntu/campusfind
+ExecStart=/home/ubuntu/campusfind/venv/bin/gunicorn \
+          --workers 3 \
+          --bind 127.0.0.1:8000 \
+          campusfind.wsgi:application
+Restart=always</pre>
+          </div>
+          <div class="card blue">
+            <div class="card-title"><span class="icon">⚡</span> Nginx Reverse Proxy</div>
+            <ul>
+              <li>Listens on Port 80 (HTTP) and 443 (HTTPS).</li>
+              <li>Serves compressed static files directly.</li>
+              <li>Proxies dynamic Python requests to <code>127.0.0.1:8000</code>.</li>
+              <li>Gzip compression enabled for HTML, CSS, and JS.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="4" data-slide="4" data-script="For perimeter security, we created CampusFind-EC2-SG. Inbound HTTP on port 80 and HTTPS on port 443 are open to the public, while administrative SSH on port 22 is strictly whitelisted to trusted administrative IPs. This provides strong perimeter isolation. Thank you!">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Network Perimeter</span>
+          <h2 class="slide-title">EC2 Security Group (<code>CampusFind-EC2-SG</code>)</h2>
+          <p class="slide-subtitle">Strict inbound firewall rules for public web traffic and restricted SSH</p>
+        </div>
+        <span class="slide-counter-badge">Slide 4 / 4</span>
+      </div>
+      <div class="slide-body">
+        <table class="slide-table">
+          <thead>
+            <tr><th>Port</th><th>Protocol</th><th>Source</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>80</code></td><td>TCP (HTTP)</td><td><code>0.0.0.0/0</code></td><td>Public web traffic for student browsers</td></tr>
+            <tr><td><code>443</code></td><td>TCP (HTTPS)</td><td><code>0.0.0.0/0</code></td><td>Encrypted public web traffic</td></tr>
+            <tr><td><code>22</code></td><td>TCP (SSH)</td><td><code>Admin-IP/32</code></td><td>Strictly restricted administrative SSH maintenance</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==================== ROLE 5: DATABASE LEAD ==================== -->
+    <section class="slide" data-role="5" data-slide="1" data-script="Hello, my name is [Your Name], and I was the Database Lead for CampusFind. I was responsible for database schema normalization, provisioning our managed relational database on Amazon RDS, configuring private subnet networking, and maintaining data migration integrity.">
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; gap: 16px;">
+        <div style="font-size: 3.5rem;">🗄️</div>
+        <h1 style="font-size: 2.6rem; font-weight: 900; background: linear-gradient(135deg, #FFFFFF, #FBBF24); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Relational Database & Amazon RDS</h1>
+        <p style="font-size: 1.2rem; color: #94A3B8; max-width: 800px;">Third Normal Form (3NF) Schema, PostgreSQL 16 & Private Subnet Isolation</p>
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">🗄️ Role: Database Lead / Data Engineer</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">📁 Files: seed_data.py, campusfind/settings.py</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">⏱️ Time: 2:00 – 2:30 Min</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="5" data-slide="2" data-script="Our schema is strictly normalized to Third Normal Form (3NF): The standard auth_user table manages account authentication, password hashes, and staff flags. The core_item table stores lost/found listings, connected to auth_user via a cascading foreign key. We placed B-tree indexes on high-frequency query columns including status, category, and created_at to ensure sub-millisecond filtering speed even across thousands of campus records. Our automated seeding script seed_data.py populates realistic sample items and user accounts.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Data Modeling</span>
+          <h2 class="slide-title">Entity Relationship Diagram (3NF ERD)</h2>
+          <p class="slide-subtitle">Normalized relational schema with cascading foreign keys and performance indexes</p>
+        </div>
+        <span class="slide-counter-badge">Slide 2 / 3</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="diagram-box">
+            <img src="../diagrams/database_erd.png" alt="Database ERD Diagram">
+          </div>
+          <div class="card amber">
+            <div class="card-title"><span class="icon">📊</span> Schema Architecture</div>
+            <ul>
+              <li><strong><code>auth_user</code>:</strong> Stores credentials, PBKDF2 hashes, and permissions.</li>
+              <li><strong><code>core_item</code>:</strong> Contains item title, category, building, status, date, and S3 image keys.</li>
+              <li><strong>Cascading Deletes:</strong> If an account is deleted, associated items are handled safely.</li>
+              <li><strong>Indexing:</strong> B-tree indexes on <code>status</code> and <code>category</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="5" data-slide="3" data-script="For our cloud database, we provisioned PostgreSQL 16 on Amazon RDS (db.t3.micro Free Tier). It is deployed with 'Publicly Accessible: No' inside a private DB subnet group. Its dedicated security group, CampusFind-RDS-SG, contains an inbound rule allowing TCP port 5432 exclusively from CampusFind-EC2-SG. This guarantees that no external actor on the internet can scan or connect directly to the database. Thank you!">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Cloud Database</span>
+          <h2 class="slide-title">Amazon RDS & Private Subnet Isolation</h2>
+          <p class="slide-subtitle">Zero public database exposure with strictly scoped security group inbound rules</p>
+        </div>
+        <span class="slide-counter-badge">Slide 3 / 3</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card blue">
+            <div class="card-title"><span class="icon">☁️</span> Amazon RDS Parameters</div>
+            <ul>
+              <li><strong>Engine:</strong> PostgreSQL 16 (or MySQL 8.0).</li>
+              <li><strong>Instance Class:</strong> <code>db.t3.micro</code> (Free Tier).</li>
+              <li><strong>Public Access:</strong> <strong>NO</strong> (Private DB Subnet).</li>
+              <li><strong>Automated Backups:</strong> Daily automated snapshots.</li>
+            </ul>
+          </div>
+          <div class="card rose">
+            <div class="card-title"><span class="icon">🔒</span> RDS Security Group (<code>CampusFind-RDS-SG</code>)</div>
+            <table class="slide-table">
+              <thead>
+                <tr><th>Port</th><th>Protocol</th><th>Source</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>5432</code></td><td>TCP (PostgreSQL)</td><td><code>CampusFind-EC2-SG</code> (Security Group ID)</td></tr>
+              </tbody>
+            </table>
+            <p style="margin-top: 8px; font-size: 0.85rem; color: #94A3B8;">Direct connections from the public internet are blocked 100% at the AWS network layer.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ROLE 6: STORAGE & SECURITY LEAD ==================== -->
+    <section class="slide" data-role="6" data-slide="1" data-script="Hello, my name is [Your Name], and I served as the Storage & Security Lead for CampusFind. My responsibility was architecting our decoupled media storage pipeline on Amazon S3 and implementing an end-to-end least-privilege security framework across cloud and application layers.">
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; gap: 16px;">
+        <div style="font-size: 3.5rem;">🔐</div>
+        <h1 style="font-size: 2.6rem; font-weight: 900; background: linear-gradient(135deg, #FFFFFF, #F43F5E); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Cloud Storage & Security Governance</h1>
+        <p style="font-size: 1.2rem; color: #94A3B8; max-width: 800px;">Decoupled Amazon S3 Storage, IAM Least-Privilege & Application Hardening</p>
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">🔐 Role: Storage & Security Lead</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">📁 Files: deploy/iam_policy.json, .env.example</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">⏱️ Time: 2:30 – 3:00 Min</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="6" data-slide="2" data-script="In cloud architecture, compute should always remain stateless. Instead of storing uploaded images on the EC2 disk, CampusFind uploads all item photos directly to our dedicated Amazon S3 bucket: campusfind-item-images-capstone. We integrated boto3 and django-storages with automatic local storage fallback when USE_S3=False for offline testing. We enforce strict upload validation: files are restricted to valid image MIME types and capped at a maximum of 5 MB.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Object Storage</span>
+          <h2 class="slide-title">Decoupled Amazon S3 Media Pipeline</h2>
+          <p class="slide-subtitle">Isolating ephemeral compute disk from persistent image assets</p>
+        </div>
+        <span class="slide-counter-badge">Slide 2 / 4</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card cyan">
+            <div class="card-title"><span class="icon">📦</span> Amazon S3 Integration</div>
+            <ul>
+              <li><strong>Dedicated Bucket:</strong> <code>campusfind-item-images-capstone</code>.</li>
+              <li><strong>Stateless EC2:</strong> EC2 instances can be destroyed or scaled without losing photos.</li>
+              <li><strong>Offline Fallback:</strong> If <code>USE_S3=False</code>, Django automatically saves files to local disk.</li>
+            </ul>
+          </div>
+          <div class="card blue">
+            <div class="card-title"><span class="icon">⚡</span> File Upload Validation Pipeline</div>
+            <ul>
+              <li><strong>Format Whitelist:</strong> <code>.jpg</code>, <code>.jpeg</code>, <code>.png</code>, <code>.webp</code>.</li>
+              <li><strong>Size Ceiling:</strong> 5MB limit validated on client and server.</li>
+              <li><strong>Collision Protection:</strong> Hashed UUID file naming.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="6" data-slide="3" data-script="For cloud security, we strictly follow the Principle of Least Privilege: Our IAM policy grants only s3:PutObject, s3:GetObject, s3:DeleteObject, and s3:ListBucket strictly scoped to our specific bucket ARN. Furthermore, we enforce zero hardcoded secrets: no database passwords, secret keys, or AWS access tokens exist in source code. Everything is injected at runtime through environment variables via .env.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">IAM Security</span>
+          <h2 class="slide-title">IAM Least-Privilege & Secrets Governance</h2>
+          <p class="slide-subtitle">Strict ARN resource scoping and runtime environment variable injection</p>
+        </div>
+        <span class="slide-counter-badge">Slide 3 / 4</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card aws">
+            <div class="card-title"><span class="icon">📜</span> Scoped IAM Policy (JSON)</div>
+            <pre class="code-block">{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": "arn:aws:s3:::campusfind-item-images-capstone/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "arn:aws:s3:::campusfind-item-images-capstone"
+    }
+  ]
+}</pre>
+          </div>
+          <div class="card emerald">
+            <div class="card-title"><span class="icon">🔑</span> Zero Hardcoded Secrets</div>
+            <ul>
+              <li>Runtime configuration via <code>.env</code> file.</li>
+              <li><code>.env</code> added to <code>.gitignore</code> to protect credentials.</li>
+              <li>Separation of Development and Production keys.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="6" data-slide="4" data-script="At the application layer: User passwords use Django's PBKDF2 algorithm with SHA-256 and unique per-user cryptographic salts. SQL injection is prevented through parameterized ORM queries. CSRF tokens protect all state-changing forms, and template escaping prevents XSS attacks. Thank you!">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Application Security</span>
+          <h2 class="slide-title">Application Layer Threat Hardening</h2>
+          <p class="slide-subtitle">Built-in framework defenses against top web vulnerabilities</p>
+        </div>
+        <span class="slide-counter-badge">Slide 4 / 4</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card rose">
+            <div class="card-title"><span class="icon">🛡️</span> Cryptographic & Injection Defenses</div>
+            <ul>
+              <li><strong>Password Hashing:</strong> Salted PBKDF2 SHA-256 algorithm.</li>
+              <li><strong>SQL Injection Immunity:</strong> Parameterized Django ORM queries.</li>
+              <li><strong>Cross-Site Defenses:</strong> CSRF tokens on all POST requests.</li>
+              <li><strong>XSS Escaping:</strong> Automatic HTML escaping in all templates.</li>
+            </ul>
+          </div>
+          <div class="card purple">
+            <div class="card-title"><span class="icon">🔒</span> Production Hardening</div>
+            <ul>
+              <li><code>DEBUG=False</code> in production to prevent stack trace leaks.</li>
+              <li>Secure HTTP cookies and session expiration.</li>
+              <li>Nginx static caching with Gzip compression.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ROLE 7: QA & DOCS LEAD ==================== -->
+    <section class="slide" data-role="7" data-slide="1" data-script="Hello, my name is [Your Name], and I served as the QA, Testing & Documentation Lead for CampusFind. My role was implementing automated unit and integration tests, setting up synthetic health monitoring, analyzing Amazon CloudWatch telemetry, and compiling our final capstone technical documentation.">
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; gap: 16px;">
+        <div style="font-size: 3.5rem;">🧪</div>
+        <h1 style="font-size: 2.6rem; font-weight: 900; background: linear-gradient(135deg, #FFFFFF, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Testing, Observability & Conclusion</h1>
+        <p style="font-size: 1.2rem; color: #94A3B8; max-width: 800px;">Automated Test Suite (9/9 Passing), Amazon CloudWatch Telemetry & Health Checks</p>
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">🧪 Role: QA, Testing & Docs Lead</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">📁 Files: core/tests.py, 06_FINAL_TECHNICAL_REPORT.md</span>
+          <span style="background:#1E293B; padding:6px 14px; border-radius:6px; font-size:0.85rem; border:1px solid #334155;">⏱️ Time: 2:30 – 3:00 Min</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="7" data-slide="2" data-script="To ensure zero regressions, we built a comprehensive test suite in core/tests.py. When we run python manage.py test: 9 automated test cases execute covering user registration, session authentication, item CRUD creation, file size validation, search filtering, ownership permissions, and health checks. All 9 tests pass with a 100% success rate in under 32 seconds.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Automated QA</span>
+          <h2 class="slide-title">Automated Testing & Validation Results</h2>
+          <p class="slide-subtitle">100% test pass rate across unit, integration, and security test cases</p>
+        </div>
+        <span class="slide-counter-badge">Slide 2 / 5</span>
+      </div>
+      <div class="slide-body">
+        <table class="slide-table">
+          <thead>
+            <tr><th>Test ID</th><th>Scenario</th><th>Target</th><th>Result</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>TC-01</code></td><td>User Registration</td><td>Account creation, password hashing, session login</td><td><span style="color:#34D399; font-weight:700;">PASS</span></td></tr>
+            <tr><td><code>TC-02</code></td><td>Authentication</td><td>Login session creation & logout destruction</td><td><span style="color:#34D399; font-weight:700;">PASS</span></td></tr>
+            <tr><td><code>TC-03</code></td><td>Create Lost Item</td><td>Field validation & DB persistence</td><td><span style="color:#34D399; font-weight:700;">PASS</span></td></tr>
+            <tr><td><code>TC-04</code></td><td>Create Found Item</td><td>Image attachment & building preset validation</td><td><span style="color:#34D399; font-weight:700;">PASS</span></td></tr>
+            <tr><td><code>TC-05</code></td><td>Image Validation</td><td>5MB size limit & MIME format whitelist</td><td><span style="color:#34D399; font-weight:700;">PASS</span></td></tr>
+            <tr><td><code>TC-06</code></td><td>Catalog Filtering</td><td>Keyword search ('MacBook') & category filters</td><td><span style="color:#34D399; font-weight:700;">PASS</span></td></tr>
+            <tr><td><code>TC-07</code></td><td>Ownership Access</td><td>Blocking non-owners from editing listings</td><td><span style="color:#34D399; font-weight:700;">PASS</span></td></tr>
+            <tr><td><code>TC-08</code></td><td>Lifecycle Resolution</td><td>Marking status as Claimed / Reunited</td><td><span style="color:#34D399; font-weight:700;">PASS</span></td></tr>
+            <tr><td><code>TC-09</code></td><td>Cloud Health Endpoint</td><td><code>GET /health/</code> returning HTTP 200 JSON</td><td><span style="color:#34D399; font-weight:700;">PASS</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="slide" data-role="7" data-slide="3" data-script="For uptime monitoring, we implemented a dedicated /health/ JSON endpoint that verifies live database connectivity for load balancers. In Amazon CloudWatch, we monitored our EC2 instance: CPUUtilization consistently averages under 3% during standard operations, and NetworkIn/NetworkOut metrics verify normal web and image transfer traffic without bottlenecks.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Observability</span>
+          <h2 class="slide-title">CloudWatch Telemetry & Health Monitoring</h2>
+          <p class="slide-subtitle">Proactive system health verification and AWS cloud infrastructure metrics</p>
+        </div>
+        <span class="slide-counter-badge">Slide 3 / 5</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card blue">
+            <div class="card-title"><span class="icon">🩺</span> Dedicated <code>/health/</code> Endpoint</div>
+            <pre class="code-block">GET /health/ HTTP/1.1
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "status": "healthy",
+  "database": "connected",
+  "storage": "operational",
+  "timestamp": "2026-08-22T10:00:00Z"
+}</pre>
+          </div>
+          <div class="card aws">
+            <div class="card-title"><span class="icon">📊</span> CloudWatch Metrics</div>
+            <ul>
+              <li><strong>EC2 CPUUtilization:</strong> Averages &lt; 3% under steady state.</li>
+              <li><strong>NetworkIn / NetworkOut:</strong> Real-time bandwidth telemetry.</li>
+              <li><strong>Instance Status Checks:</strong> Automated alerts for host reachability.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="7" data-slide="4" data-script="During our sprint, we resolved key engineering challenges—including WhiteNoise static manifests during test execution and implementing conditional S3 storage backends for offline development. Future roadmap items include automated email keyword matching and printable QR code asset tags.">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Engineering Insights</span>
+          <h2 class="slide-title">Challenges Overcome & Future Roadmap</h2>
+          <p class="slide-subtitle">Sprint reflections and future architectural evolutions</p>
+        </div>
+        <span class="slide-counter-badge">Slide 4 / 5</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card amber">
+            <div class="card-title"><span class="icon">⚠️</span> Technical Challenges Solved</div>
+            <ul>
+              <li><strong>WhiteNoise Test Manifest:</strong> Switched to <code>CompressedStaticFilesStorage</code> for test compatibility.</li>
+              <li><strong>Offline S3 Fallback:</strong> Conditional storage switching via <code>USE_S3</code>.</li>
+              <li><strong>RDS Subnet Isolation:</strong> Private subnet routing with Security Groups.</li>
+            </ul>
+          </div>
+          <div class="card emerald">
+            <div class="card-title"><span class="icon">🚀</span> Future Roadmap</div>
+            <ul>
+              <li><strong>AI Keyword Matching:</strong> Email alerts when found items match lost items.</li>
+              <li><strong>QR Code Asset Stickers:</strong> Printable QR stickers for 1-tap lost reporting.</li>
+              <li><strong>Multi-AZ Load Balancing:</strong> Application Load Balancer across multiple AZs.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-role="7" data-slide="5" data-script="In conclusion, CampusFind successfully proves that a secure, scalable, and production-grade cloud solution can be built entirely within AWS Free Tier resources. All 4 DOCX deliverables, deployment scripts, and automated tests are verified and complete. Thank you very much for your time!">
+      <div class="slide-header">
+        <div>
+          <span class="slide-category">Conclusion</span>
+          <h2 class="slide-title">Project Summary & Capstone Achievements</h2>
+          <p class="slide-subtitle">Delivering an enterprise-grade cloud solution within academic sprint constraints</p>
+        </div>
+        <span class="slide-counter-badge">Slide 5 / 5</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card blue">
+            <div class="card-title"><span class="icon">🏆</span> Capstone Deliverables Complete</div>
+            <ul>
+              <li><code>01_PROJECT_PROPOSAL.md</code> / <code>proposal.docx</code></li>
+              <li><code>02_SYSTEM_DESIGN_AND_ARCHITECTURE.md</code> / <code>system_design.docx</code></li>
+              <li><code>03_AWS_DEPLOYMENT_GUIDE.md</code> / <code>deployment_proof.docx</code></li>
+              <li><code>06_FINAL_TECHNICAL_REPORT.md</code> / <code>final_technical_report.docx</code></li>
+            </ul>
+          </div>
+          <div class="card emerald">
+            <div class="card-title"><span class="icon">☁️</span> AWS Free Tier Verification</div>
+            <p>100% compliant with Free Tier allowances across EC2, RDS, S3, IAM, and CloudWatch. Ready for academic evaluation!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Teleprompter Drawer -->
+  <div class="teleprompter-drawer" id="teleprompterDrawer">
+    <div class="prompter-header">
+      <span id="prompterRoleTag">🎙️ SCRIPT: Role 1 (Team Lead)</span>
+      <span style="color: var(--text-muted);">Press 'N' to Hide Teleprompter</span>
+    </div>
+    <div class="prompter-body" id="prompterBody">
+      Loading script...
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <footer class="bottom-bar">
+    <div class="nav-controls">
+      <button class="btn" id="prevBtn" title="Previous Slide (Left Arrow / Backspace)">◀ Prev</button>
+      <button class="btn" id="nextBtn" title="Next Slide (Right Arrow / Space)">Next ▶</button>
+      <span style="font-size: 0.9rem; font-weight: 700; color: var(--text-muted);" id="slideCounter">Slide 1 of 5</span>
+    </div>
+
+    <div style="font-size: 0.85rem; color: var(--text-muted);">
+      Shortcuts: <kbd>Space</kbd>/<kbd>→</kbd> Next · <kbd>←</kbd> Prev · <kbd>N</kbd> Script · <kbd>T</kbd> Timer · <kbd>F</kbd> Fullscreen
+    </div>
+  </footer>
+
+  <script>
+    // Role metadata definitions
+    const roleMeta = {
+      1: { name: "Role 1: Team Lead / PM", title: "Project Vision & Governance", target: "Target: 2.5 min", maxSec: 150 },
+      2: { name: "Role 2: Frontend UI Lead", title: "UI/UX Design & Workflows", target: "Target: 3.5 min", maxSec: 220 },
+      3: { name: "Role 3: Backend Developer", title: "App Logic & Admin Portal", target: "Target: 2.5 min", maxSec: 160 },
+      4: { name: "Role 4: Cloud Architect", title: "AWS Compute & Infrastructure", target: "Target: 3.0 min", maxSec: 180 },
+      5: { name: "Role 5: Database Lead", title: "3NF Schema & Amazon RDS", target: "Target: 2.0 min", maxSec: 140 },
+      6: { name: "Role 6: Storage & Security", title: "Amazon S3 & IAM Least-Privilege", target: "Target: 2.5 min", maxSec: 160 },
+      7: { name: "Role 7: QA & Docs Lead", title: "Automated QA & Observability", target: "Target: 3.0 min", maxSec: 180 }
+    };
+
+    let activeRoleId = 1;
+    let currentRoleSlides = [];
+    let currentSlideIndex = 0;
+
+    // Elements
+    const roleTabs = document.querySelectorAll('.role-tab');
+    const activeRoleBadge = document.getElementById('activeRoleBadge');
+    const activeRoleTitle = document.getElementById('activeRoleTitle');
+    const roleTargetTime = document.getElementById('roleTargetTime');
+    const slideCounter = document.getElementById('slideCounter');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const teleprompterDrawer = document.getElementById('teleprompterDrawer');
+    const prompterBody = document.getElementById('prompterBody');
+    const prompterRoleTag = document.getElementById('prompterRoleTag');
+    const teleprompterBtn = document.getElementById('teleprompterBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+    // Timer
+    const roleTimer = document.getElementById('roleTimer');
+    const timerBtn = document.getElementById('timerBtn');
+    const resetTimerBtn = document.getElementById('resetTimerBtn');
+    let timerSec = 0;
+    let timerInterval = null;
+    let isTimerActive = false;
+
+    function setRole(roleId) {
+      activeRoleId = parseInt(roleId, 10);
+      roleTabs.forEach(tab => tab.classList.toggle('active', parseInt(tab.dataset.roleId, 10) === activeRoleId));
+
+      const meta = roleMeta[activeRoleId];
+      activeRoleBadge.textContent = meta.name;
+      activeRoleTitle.textContent = meta.title;
+      roleTargetTime.textContent = meta.target;
+
+      // Hide all slides, get slides for this role
+      document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+      currentRoleSlides = Array.from(document.querySelectorAll(`.slide[data-role="${activeRoleId}"]`));
+      currentSlideIndex = 0;
+      updateSlideView();
+      resetTimer();
+    }
+
+    function updateSlideView() {
+      currentRoleSlides.forEach((slide, idx) => {
+        slide.classList.toggle('active', idx === currentSlideIndex);
+      });
+
+      const currentSlide = currentRoleSlides[currentSlideIndex];
+      const script = currentSlide ? currentSlide.getAttribute('data-script') : '';
+
+      slideCounter.textContent = `Slide ${currentSlideIndex + 1} of ${currentRoleSlides.length}`;
+      prompterRoleTag.textContent = `🎙️ SCRIPT: ${roleMeta[activeRoleId].name} (Slide ${currentSlideIndex + 1}/${currentRoleSlides.length})`;
+      prompterBody.innerHTML = `<p style="font-size: 1.05rem; line-height: 1.6;">${script}</p>`;
+
+      prevBtn.disabled = currentSlideIndex === 0;
+      nextBtn.disabled = currentSlideIndex === currentRoleSlides.length - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlideIndex < currentRoleSlides.length - 1) {
+        currentSlideIndex++;
+        updateSlideView();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlideIndex > 0) {
+        currentSlideIndex--;
+        updateSlideView();
+      }
+    }
+
+    function toggleTeleprompter() {
+      const isOpen = teleprompterDrawer.classList.toggle('open');
+      teleprompterBtn.classList.toggle('active', isOpen);
+    }
+
+    // Timer Functions
+    function toggleTimer() {
+      if (isTimerActive) {
+        clearInterval(timerInterval);
+        isTimerActive = false;
+        timerBtn.textContent = '⏱️ Record Timer';
+        timerBtn.classList.remove('active');
+      } else {
+        isTimerActive = true;
+        timerBtn.textContent = '⏸️ Pause Timer';
+        timerBtn.classList.add('active');
+        timerInterval = setInterval(() => {
+          timerSec++;
+          const mins = Math.floor(timerSec / 60);
+          const secs = timerSec % 60;
+          roleTimer.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+          
+          const max = roleMeta[activeRoleId].maxSec;
+          if (timerSec >= max) {
+            roleTimer.className = 'timer-box danger';
+          } else if (timerSec >= max - 30) {
+            roleTimer.className = 'timer-box warning';
+          } else {
+            roleTimer.className = 'timer-box';
+          }
+        }, 1000);
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isTimerActive = false;
+      timerSec = 0;
+      roleTimer.textContent = '00:00';
+      roleTimer.className = 'timer-box';
+      timerBtn.textContent = '⏱️ Record Timer';
+      timerBtn.classList.remove('active');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    // Event Listeners
+    roleTabs.forEach(tab => {
+      tab.addEventListener('click', () => setRole(tab.dataset.roleId));
+    });
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+    teleprompterBtn.addEventListener('click', toggleTeleprompter);
+    timerBtn.addEventListener('click', toggleTimer);
+    resetTimerBtn.addEventListener('click', resetTimer);
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+      switch(e.key) {
+        case 'ArrowRight':
+        case ' ':
+          e.preventDefault();
+          nextSlide();
+          break;
+        case 'ArrowLeft':
+        case 'Backspace':
+          e.preventDefault();
+          prevSlide();
+          break;
+        case 'n':
+        case 'N':
+          toggleTeleprompter();
+          break;
+        case 't':
+        case 'T':
+          toggleTimer();
+          break;
+        case 'f':
+        case 'F':
+          toggleFullscreen();
+          break;
+      }
+    });
+
+    // Check URL parameters (e.g. ?role=4)
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialRole = 5;
+    setRole(initialRole);
+  </script>
+</body>
+</html>

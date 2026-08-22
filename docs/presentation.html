@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusFind - Capstone Presentation Slides | CSBC 252</title>
+  <style>
+    :root {
+      --bg-dark: #0B1120;
+      --bg-card: #1E293B;
+      --bg-card-hover: #334155;
+      --border-color: #334155;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --primary-blue: #3B82F6;
+      --primary-glow: rgba(59, 130, 246, 0.35);
+      --accent-cyan: #06B6D4;
+      --accent-emerald: #10B981;
+      --accent-amber: #F59E0B;
+      --accent-rose: #F43F5E;
+      --accent-purple: #8B5CF6;
+      --aws-orange: #FF9900;
+      --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* Top Progress Bar */
+    .progress-bar-container {
+      height: 4px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--primary-blue), var(--accent-purple));
+      transition: width 0.3s ease;
+    }
+
+    /* Presentation Header / Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 90;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .brand-title .badge {
+      background: linear-gradient(135deg, var(--primary-blue), var(--accent-purple));
+      color: white;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .speaker-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #1E293B;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid #334155;
+      font-size: 0.85rem;
+    }
+    .speaker-pill .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+    }
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .timer-widget {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #0F172A;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      font-family: monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+    .timer-widget.warning {
+      color: var(--accent-amber);
+      border-color: var(--accent-amber);
+    }
+    .timer-widget.danger {
+      color: var(--accent-rose);
+      border-color: var(--accent-rose);
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    button.icon-btn {
+      background: #1E293B;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    button.icon-btn:hover {
+      background: #334155;
+      border-color: var(--primary-blue);
+    }
+    button.icon-btn.active {
+      background: var(--primary-blue);
+      border-color: var(--primary-blue);
+      color: white;
+    }
+
+    /* Main Deck Stage */
+    .deck-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .slide {
+      position: absolute;
+      width: 94%;
+      max-width: 1400px;
+      height: 92%;
+      max-height: 820px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 36px 48px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(59, 130, 246, 0.05);
+      opacity: 0;
+      transform: scale(0.96) translateX(40px);
+      pointer-events: none;
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: scale(1) translateX(0);
+      pointer-events: auto;
+      z-index: 10;
+    }
+
+    /* Slide Header */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 16px;
+    }
+    .slide-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .slide-category {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+    .slide-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      background: linear-gradient(135deg, #FFFFFF 60%, #94A3B8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .slide-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .slide-number-pill {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.6);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Slide Content Layouts */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      color: #E2E8F0;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      height: 100%;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      height: 100%;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    /* Card Component */
+    .card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .card:hover {
+      border-color: rgba(59, 130, 246, 0.5);
+      transform: translateY(-2px);
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title .icon {
+      font-size: 1.3rem;
+    }
+    .card p, .card li {
+      color: #CBD5E1;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .card ul {
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* Color accents for cards */
+    .card.blue { border-left: 4px solid var(--primary-blue); }
+    .card.cyan { border-left: 4px solid var(--accent-cyan); }
+    .card.emerald { border-left: 4px solid var(--accent-emerald); }
+    .card.amber { border-left: 4px solid var(--accent-amber); }
+    .card.rose { border-left: 4px solid var(--accent-rose); }
+    .card.purple { border-left: 4px solid var(--accent-purple); }
+    .card.aws { border-left: 4px solid var(--aws-orange); }
+
+    /* Highlights & Badges */
+    .badge-tag {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-tag.blue { background: rgba(59, 130, 246, 0.2); color: #93C5FD; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-tag.green { background: rgba(16, 185, 129, 0.2); color: #6EE7B7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-tag.amber { background: rgba(245, 158, 11, 0.2); color: #FCD34D; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-tag.rose { background: rgba(244, 63, 94, 0.2); color: #FDA4AF; border: 1px solid rgba(244, 63, 94, 0.3); }
+    .badge-tag.aws { background: rgba(255, 153, 0, 0.2); color: #FDBA74; border: 1px solid rgba(255, 153, 0, 0.3); }
+
+    /* Tables */
+    table.slide-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    table.slide-table th {
+      background: #1E293B;
+      color: #F8FAFC;
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-color);
+    }
+    table.slide-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+      color: #CBD5E1;
+    }
+    table.slide-table tr:hover td {
+      background: rgba(51, 65, 85, 0.3);
+    }
+
+    /* Code Snippets */
+    pre.code-block {
+      background: #090D16;
+      border: 1px solid #1E293B;
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+      font-size: 0.85rem;
+      color: #38BDF8;
+      overflow-x: auto;
+      line-height: 1.45;
+    }
+
+    /* Diagram Containers */
+    .diagram-frame {
+      background: #0F172A;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      overflow: hidden;
+    }
+    .diagram-frame img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+
+    /* Title Slide Specifics */
+    .title-slide-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+      gap: 20px;
+    }
+    .title-icon {
+      font-size: 4rem;
+      filter: drop-shadow(0 0 20px var(--primary-blue));
+    }
+    .main-hero-title {
+      font-size: 3.2rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #FFFFFF 20%, #60A5FA 70%, #A78BFA);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .hero-subtitle {
+      font-size: 1.35rem;
+      color: #94A3B8;
+      max-width: 800px;
+    }
+    .hero-metadata {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .hero-meta-badge {
+      background: #1E293B;
+      border: 1px solid #334155;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #E2E8F0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Presenter / Speaker Notes Drawer */
+    .speaker-notes-panel {
+      position: fixed;
+      bottom: 60px;
+      left: 20px;
+      right: 20px;
+      height: 220px;
+      background: rgba(11, 17, 32, 0.95);
+      border: 1px solid var(--primary-blue);
+      border-radius: 12px;
+      padding: 16px 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.7);
+      z-index: 95;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .speaker-notes-panel.open {
+      display: flex;
+    }
+    .notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 6px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+    .notes-content {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #F1F5F9;
+    }
+    .notes-content strong {
+      color: var(--accent-amber);
+    }
+    .notes-content p {
+      margin-bottom: 8px;
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px;
+      background: rgba(15, 23, 42, 0.9);
+      border-top: 1px solid var(--border-color);
+      z-index: 90;
+    }
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .slide-counter {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .slide-selector {
+      background: #1E293B;
+      color: white;
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      max-width: 320px;
+    }
+
+    /* Slide Overview Modal */
+    .overview-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(11, 17, 32, 0.95);
+      backdrop-filter: blur(15px);
+      z-index: 200;
+      display: none;
+      flex-direction: column;
+      padding: 40px;
+      overflow-y: auto;
+    }
+    .overview-modal.open {
+      display: flex;
+    }
+    .overview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .overview-card {
+      background: #1E293B;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .overview-card:hover {
+      border-color: var(--primary-blue);
+      transform: scale(1.03);
+    }
+    .overview-card.active {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+    }
+    .overview-card h4 {
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      color: #FFFFFF;
+    }
+    .overview-card p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Print Styles for Direct PDF Export */
+    @media print {
+      body {
+        overflow: visible;
+        background: white !important;
+        color: black !important;
+        height: auto;
+      }
+      .top-bar, .bottom-bar, .speaker-notes-panel, .progress-bar-container, .overview-modal {
+        display: none !important;
+      }
+      .deck-container {
+        display: block;
+        padding: 0;
+      }
+      .slide {
+        position: relative !important;
+        opacity: 1 !important;
+        transform: none !important;
+        display: flex !important;
+        page-break-after: always;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100vh !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: white !important;
+        color: #1E293B !important;
+        padding: 40px !important;
+      }
+      .slide-title {
+        color: #1E3A8A !important;
+        -webkit-text-fill-color: initial !important;
+      }
+      .card {
+        background: #F8FAFC !important;
+        border: 1px solid #CBD5E1 !important;
+        color: #1E293B !important;
+      }
+      .card p, .card li, .slide-body {
+        color: #334155 !important;
+      }
+      pre.code-block {
+        background: #F1F5F9 !important;
+        color: #0F172A !important;
+        border: 1px solid #CBD5E1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Top Header Bar -->
+  <header class="top-bar">
+    <div class="brand-title">
+      <span>🧭 CampusFind</span>
+      <span class="badge">AWS Cloud Capstone</span>
+      <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">CSBC 252</span>
+    </div>
+
+    <div class="speaker-pill" id="currentSpeakerPill">
+      <div class="dot"></div>
+      <span id="currentSpeakerName">Team Lead / Project Manager</span>
+      <span style="color: var(--text-muted); font-size: 0.75rem;" id="speakerTime">(0:00 – 2:30)</span>
+    </div>
+
+    <div class="top-actions">
+      <div class="timer-widget" id="timerDisplay">00:00</div>
+      <button class="icon-btn" id="timerToggleBtn" title="Start/Pause Timer">⏱️ Run</button>
+      <button class="icon-btn" id="timerResetBtn" title="Reset Timer">🔄</button>
+      <button class="icon-btn" id="notesToggleBtn" title="Toggle Speaker Script Notes (Hotkey: N)">📝 Notes</button>
+      <button class="icon-btn" id="overviewToggleBtn" title="Slide Overview (Hotkey: O)">📑 Grid</button>
+      <button class="icon-btn" id="fullscreenBtn" title="Fullscreen (Hotkey: F)">⛶</button>
+      <button class="icon-btn" onclick="window.print()" title="Export / Print Slides to PDF (Hotkey: P)">🖨️ PDF</button>
+    </div>
+  </header>
+
+  <!-- Main Slide Deck Container -->
+  <main class="deck-container" id="deckContainer">
+
+    <!-- SLIDE 1: Title Slide -->
+    <section class="slide active" data-slide="1" data-speaker="Team Lead / PM" data-time="0:00 – 2:30" data-notes="Welcome Professor and classmates. Introduce CampusFind: A Cloud-Based Campus Lost & Found System for CSBC 252. Mention that our platform integrates Amazon EC2, Amazon RDS, Amazon S3, IAM, and CloudWatch. Outline our 15-20 min structure.">
+      <div class="title-slide-content">
+        <div class="title-icon">🧭</div>
+        <h1 class="main-hero-title">CampusFind</h1>
+        <p class="hero-subtitle">A Resilient, Cloud-Native Campus Lost & Found System on AWS Free Tier</p>
+        
+        <div class="hero-metadata">
+          <div class="hero-meta-badge">🎓 CSBC 252: Intro to Cloud Computing</div>
+          <div class="hero-meta-badge">☁️ AWS Cloud Architecture</div>
+          <div class="hero-meta-badge">🐍 Django 5.0 + Python 3.12</div>
+          <div class="hero-meta-badge">📅 August 2026</div>
+        </div>
+
+        <div style="margin-top: 30px; display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; max-width: 900px;">
+          <span class="badge-tag blue">1. Team Lead / PM</span>
+          <span class="badge-tag cyan">2. Frontend UI Lead</span>
+          <span class="badge-tag green">3. Backend Developer</span>
+          <span class="badge-tag aws">4. Cloud Architect</span>
+          <span class="badge-tag amber">5. Database Lead</span>
+          <span class="badge-tag rose">6. Storage & Security</span>
+          <span class="badge-tag blue">7. QA & Docs Lead</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2: Executive Summary -->
+    <section class="slide" data-slide="2" data-speaker="Team Lead / PM" data-time="0:00 – 2:30" data-notes="Provide the executive summary. Millions of personal items are lost on campuses every semester. CampusFind solves this through high-availability cloud architecture, decoupling compute and storage, and enforcing role governance.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Project Overview</span>
+          <h2 class="slide-title">Executive Summary & Vision</h2>
+          <p class="slide-subtitle">Bridging the campus lost-and-found communication gap with cloud infrastructure</p>
+        </div>
+        <span class="slide-number-pill">Slide 2 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card blue">
+            <div class="card-title"><span class="icon">🏫</span> The Campus Problem</div>
+            <p>University students lose valuable items daily—IDs, keys, laptops, chargers, textbooks. Recovery is slow, disorganized, and stressful.</p>
+            <ul>
+              <li>Fragmented WhatsApp / Telegram chats</li>
+              <li>Unindexed bulletin boards</li>
+              <li>Zero real-time search or verification</li>
+            </ul>
+          </div>
+          <div class="card cyan">
+            <div class="card-title"><span class="icon">💡</span> The Solution</div>
+            <p><strong>CampusFind:</strong> A centralized, responsive web platform backed by scalable AWS cloud infrastructure.</p>
+            <ul>
+              <li>Instant keyword & category search</li>
+              <li>S3-backed image verification</li>
+              <li>Printable flyers with tear-off contact slips</li>
+              <li>Lifecycle status tracking</li>
+            </ul>
+          </div>
+          <div class="card aws">
+            <div class="card-title"><span class="icon">☁️</span> AWS Cloud Strategy</div>
+            <p>100% compliant with <strong>AWS Free Tier</strong> while adhering to enterprise cloud best practices.</p>
+            <ul>
+              <li><strong>EC2 (Ubuntu 24.04):</strong> Nginx + Gunicorn</li>
+              <li><strong>RDS (PostgreSQL):</strong> 3NF Relational DB</li>
+              <li><strong>S3:</strong> Isolated object media storage</li>
+              <li><strong>CloudWatch:</strong> Telemetry & monitoring</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3: Problem Statement & Friction -->
+    <section class="slide" data-slide="3" data-speaker="Team Lead / PM" data-time="0:00 – 2:30" data-notes="Break down the 4 core pain points of traditional systems: fragmentation, no search, no resolution tracking, and privacy vulnerabilities. Transition to our core objectives.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Problem Statement</span>
+          <h2 class="slide-title">Traditional Friction vs Cloud-First Solution</h2>
+          <p class="slide-subtitle">Why physical boards and chat groups fail on modern university campuses</p>
+        </div>
+        <span class="slide-number-pill">Slide 3 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card rose">
+            <div class="card-title"><span class="icon">❌</span> Traditional Methods (Failures)</div>
+            <ul>
+              <li><strong>Scattered Channels:</strong> Inquiries scattered across WhatsApp, Reddit, Facebook, Instagram, and physical paper notes.</li>
+              <li><strong>Zero Search Capabilities:</strong> No ability to filter by campus building, date range, item category, or keywords.</li>
+              <li><strong>Lingering / Obsolete Records:</strong> Notice boards and chats are never cleaned up after an item is found.</li>
+              <li><strong>Privacy & Safety Risks:</strong> Students broadcast personal phone numbers publicly to open groups.</li>
+            </ul>
+          </div>
+          <div class="card emerald">
+            <div class="card-title"><span class="icon">✅</span> CampusFind Cloud Paradigm</div>
+            <ul>
+              <li><strong>Single Source of Truth:</strong> One unified university portal for all lost, found, and reunited property.</li>
+              <li><strong>Multi-Parameter Indexing:</strong> Real-time filtering by status, building presets, category, and date.</li>
+              <li><strong>Verified Lifecycle Management:</strong> One-click "Mark as Claimed/Reunited" updates the catalog immediately.</li>
+              <li><strong>Security & Access Control:</strong> Salted password authentication, CSRF/XSS protection, and scoped contact sharing.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4: Project Objectives & Scope -->
+    <section class="slide" data-slide="4" data-speaker="Team Lead / PM" data-time="0:00 – 2:30" data-notes="Explain the project objectives and boundaries. Note what is strictly in scope and what is intentionally out of scope to avoid scope creep during the 3-day build. Hand off to Frontend Lead.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Governance</span>
+          <h2 class="slide-title">Project Objectives & Scope Boundaries</h2>
+          <p class="slide-subtitle">Clear architectural milestones within the 3-day sprint timeline</p>
+        </div>
+        <span class="slide-number-pill">Slide 4 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card blue">
+            <div class="card-title"><span class="icon">🎯</span> Core Technical Objectives</div>
+            <ul>
+              <li><strong>Full CRUD Application:</strong> Responsive UI for listing, searching, editing, and resolving lost items.</li>
+              <li><strong>Decoupled Media Storage:</strong> Direct photo uploads to Amazon S3 via <code>boto3</code> with local fallback.</li>
+              <li><strong>Managed Cloud Database:</strong> Provision Amazon RDS PostgreSQL in private DB subnet.</li>
+              <li><strong>Least Privilege Security:</strong> IAM policies and Security Groups isolating DB from public internet.</li>
+              <li><strong>Automated Health Monitoring:</strong> Automated test suite + CloudWatch metric telemetry.</li>
+            </ul>
+          </div>
+          <div class="card amber">
+            <div class="card-title"><span class="icon">🛡️</span> Scope Boundaries (Sprint Control)</div>
+            <ul>
+              <li><strong class="text-emerald">IN SCOPE:</strong> Dual-view directory (Cards & Table), Print flyer generator, Staff moderation dashboard, Dedicated Admin Operations hub (<code>/ops/</code>).</li>
+              <li><strong class="text-rose">OUT OF SCOPE:</strong> Real-time P2P chat (direct verified contact links used instead to protect student privacy and avoid spam).</li>
+              <li><strong class="text-rose">OUT OF SCOPE:</strong> Monetary bounty / payment processing (focused on altruistic campus recovery).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5: Team Roles & Responsibilities Matrix -->
+    <section class="slide" data-slide="5" data-speaker="Team Lead / PM" data-time="0:00 – 2:30" data-notes="Present the team breakdown. Introduce each member's technical domain and presentation segment. Seamless handoff to Frontend Lead for Section 2.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Team Workload</span>
+          <h2 class="slide-title">Capstone Team Roles & Responsibilities</h2>
+          <p class="slide-subtitle">Clear division of engineering domains and video presentation speaking slots</p>
+        </div>
+        <span class="slide-number-pill">Slide 5 / 20</span>
+      </div>
+      <div class="slide-body">
+        <table class="slide-table">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Primary Technical Domain</th>
+              <th>Key Deliverables</th>
+              <th>Speaking Slot</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Team Lead / PM</strong></td>
+              <td>Governance, proposal, slide assembly, sprint coordination</td>
+              <td><code>01_PROJECT_PROPOSAL.md</code>, Slide Deck</td>
+              <td>0:00 – 2:30 (2.5 min)</td>
+            </tr>
+            <tr>
+              <td><strong>2. Frontend UI Lead</strong></td>
+              <td>Bootstrap 5.3 UI, Responsive Templates, JS Client Preview, Print Flyers</td>
+              <td><code>templates/</code>, <code>styles.css</code>, <code>main.js</code></td>
+              <td>2:30 – 7:30 (5.0 min)</td>
+            </tr>
+            <tr>
+              <td><strong>3. Backend Developer</strong></td>
+              <td>Django models, CRUD views, ownership gating, <code>/ops/</code> admin portal</td>
+              <td><code>models.py</code>, <code>views.py</code>, <code>forms.py</code></td>
+              <td>App Logic (with FE)</td>
+            </tr>
+            <tr>
+              <td><strong>4. Cloud Architect</strong></td>
+              <td>EC2 instance provisioning, Nginx reverse proxy, Gunicorn WSGI</td>
+              <td><code>ec2_setup.sh</code>, <code>nginx.conf</code>, <code>gunicorn.service</code></td>
+              <td>7:30 – 10:30 (3.0 min)</td>
+            </tr>
+            <tr>
+              <td><strong>5. Database Lead</strong></td>
+              <td>RDS PostgreSQL provisioning, 3NF schema, indexes, seed data script</td>
+              <td><code>seed_data.py</code>, ERD documentation</td>
+              <td>10:30 – 12:30 (2.0 min)</td>
+            </tr>
+            <tr>
+              <td><strong>6. Storage & Security</strong></td>
+              <td>S3 bucket setup, IAM least-privilege JSON policy, secrets management</td>
+              <td><code>iam_policy.json</code>, <code>.env.example</code></td>
+              <td>12:30 – 15:00 (2.5 min)</td>
+            </tr>
+            <tr>
+              <td><strong>7. QA & Docs Lead</strong></td>
+              <td>Automated test suite (9 tests), CloudWatch metrics, final technical report</td>
+              <td><code>tests.py</code>, <code>06_FINAL_TECHNICAL_REPORT.md</code></td>
+              <td>15:00 – 18:00 (3.0 min)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: System Use Cases & User Personas -->
+    <section class="slide" data-slide="6" data-speaker="Frontend Lead" data-time="2:30 – 7:30" data-notes="Frontend Lead takes over. Discuss the three user personas: Student/General User, Staff/Moderator, and System Administrator. Explain the distinct use case boundaries.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">User Architecture</span>
+          <h2 class="slide-title">System Use Cases & Campus Personas</h2>
+          <p class="slide-subtitle">Tailored user journeys for students, faculty moderators, and cloud administrators</p>
+        </div>
+        <span class="slide-number-pill">Slide 6 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card blue">
+            <div class="card-title"><span class="icon">🎓</span> Student / General User</div>
+            <ul>
+              <li>Register and log in with student credentials.</li>
+              <li>Report lost or found items with photo uploads.</li>
+              <li>Search and filter the campus catalog.</li>
+              <li>Generate printable flyers for physical bulletin boards.</li>
+              <li>Edit, delete, and mark own listings as "Claimed".</li>
+            </ul>
+          </div>
+          <div class="card emerald">
+            <div class="card-title"><span class="icon">🛡️</span> Campus Staff / Moderator</div>
+            <ul>
+              <li>Access Staff Moderation Dashboard.</li>
+              <li>Flag inappropriate listings or spam.</li>
+              <li>Verify and resolve recovered items at campus desks.</li>
+              <li>Assist non-tech faculty in submitting found items.</li>
+            </ul>
+          </div>
+          <div class="card purple">
+            <div class="card-title"><span class="icon">⚙️</span> System Administrator (<code>/ops/</code>)</div>
+            <ul>
+              <li>User governance & staff role promotion/demotion.</li>
+              <li>Account lockout & password reset triggers.</li>
+              <li>Audited soft-delete and hard-delete operations.</li>
+              <li>Security anomaly alerts and immutable audit logs.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7: UI/UX Design System & Features -->
+    <section class="slide" data-slide="7" data-speaker="Frontend Lead" data-time="2:30 – 7:30" data-notes="Highlight UI engineering: Bootstrap 5.3, custom dark/light tokens in styles.css, client-side JS photo preview in main.js, Card vs Table view toggles, and the Print Notice Flyer with tear-off contact slips.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Frontend Engineering</span>
+          <h2 class="slide-title">UI/UX Design System & Interactive Features</h2>
+          <p class="slide-subtitle">Engineered for mobile responsiveness, high accessibility, and physical campus integration</p>
+        </div>
+        <span class="slide-number-pill">Slide 7 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card cyan">
+            <div class="card-title"><span class="icon">✨</span> Interactive UI Components</div>
+            <ul>
+              <li><strong>Hero Metric Counters:</strong> Real-time aggregate count of active lost, found, and reunited items.</li>
+              <li><strong>Dual-Mode Catalog:</strong> One-click switch between visual Card Grid and dense Table Directory view.</li>
+              <li><strong>Client-Side Photo Preview (<code>main.js</code>):</strong> Instant thumbnail preview and 5MB validation before network transfer.</li>
+              <li><strong>One-Click Contact Copy:</strong> Direct clipboard integration for quick email/phone communication.</li>
+            </ul>
+          </div>
+          <div class="card amber">
+            <div class="card-title"><span class="icon">📄</span> Physical Bulletin Notice Flyer</div>
+            <p>Bridges the digital web application with physical campus bulletin boards (Library, Student Center, Cafeteria).</p>
+            <ul>
+              <li>Print-optimized CSS stylesheet (<code>@media print</code>).</li>
+              <li>Large bold item photograph and description.</li>
+              <li><strong>Tear-off contact slips</strong> at the bottom with item title and poster phone/email.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 8: Live Demonstration Guide -->
+    <section class="slide" data-slide="8" data-speaker="Frontend Lead" data-time="2:30 – 7:30" data-notes="Walk the audience through the live demo sequence: 1) Homepage metrics, 2) Log in as student Alex, 3) Report lost MacBook with image preview, 4) Filter by Electronics/Lost, 5) Open Print Flyer, 6) Mark as Claimed.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Live Demonstration</span>
+          <h2 class="slide-title">Live Application Walkthrough Workflow</h2>
+          <p class="slide-subtitle">Step-by-step user journey showcased in the browser during the presentation</p>
+        </div>
+        <span class="slide-number-pill">Slide 8 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card blue">
+            <div class="card-title"><span class="icon">1️⃣</span> Discovery & Search</div>
+            <p><strong>Homepage & Catalog</strong></p>
+            <ul>
+              <li>Inspect live metrics & category badges.</li>
+              <li>Search query "MacBook Pro" across building presets.</li>
+              <li>Switch between Card & Table layouts.</li>
+            </ul>
+          </div>
+          <div class="card emerald">
+            <div class="card-title"><span class="icon">2️⃣</span> Posting & Validation</div>
+            <p><strong>Item Submission Flow</strong></p>
+            <ul>
+              <li>Log in as test user <code>student_alex</code>.</li>
+              <li>Fill out report form with building selection.</li>
+              <li>Select image -> verify instant JS image preview.</li>
+              <li>Submit -> direct S3 upload & DB record creation.</li>
+            </ul>
+          </div>
+          <div class="card amber">
+            <div class="card-title"><span class="icon">3️⃣</span> Flyer & Resolution</div>
+            <p><strong>Lifecycle Management</strong></p>
+            <ul>
+              <li>Open Item Detail -> Click <em>Print Notice Flyer</em>.</li>
+              <li>Inspect tear-off slips layout.</li>
+              <li>Navigate to <em>My Posts</em> -> Click <em>Mark as Claimed</em>.</li>
+              <li>Verify instant badge status update to Reunited.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 9: Admin Operations Hub -->
+    <section class="slide" data-slide="9" data-speaker="Backend Developer" data-time="App Logic" data-notes="Backend Lead / Frontend Lead explains the dedicated /ops/ admin portal. It provides role governance, user deactivation, immutable audit logs, and soft vs hard delete data safety.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Governance Portal</span>
+          <h2 class="slide-title">Admin Operations Portal (<code>/ops/</code>)</h2>
+          <p class="slide-subtitle">Enterprise-grade operations center for user governance and compliance oversight</p>
+        </div>
+        <span class="slide-number-pill">Slide 9 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card purple">
+            <div class="card-title"><span class="icon">🔐</span> Security & Role Management</div>
+            <ul>
+              <li><strong>Role-Based Authorization:</strong> Dedicated admin gate enforcing strict <code>is_superuser</code> permission checks.</li>
+              <li><strong>User Governance:</strong> Search/filter accounts, toggle account active states, and promote/demote staff roles.</li>
+              <li><strong>Security Alerts:</strong> Real-time dashboard tracking failed login anomalies and critical permission updates.</li>
+            </ul>
+          </div>
+          <div class="card blue">
+            <div class="card-title"><span class="icon">📋</span> Audit Logging & Data Safety</div>
+            <ul>
+              <li><strong>Immutable Audit Trail:</strong> Complete timestamped log of all user promotions, logins, and destructive actions.</li>
+              <li><strong>Controlled Data Queue:</strong> Two-phase deletion—items are soft-deleted first, hard-delete requires reason capture.</li>
+              <li><strong>CSV Reporting:</strong> Export compliance logs for academic governance and accreditation review.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 10: AWS Cloud Architecture Topology -->
+    <section class="slide" data-slide="10" data-speaker="Cloud Architect" data-time="7:30 – 10:30" data-notes="Cloud Architect takes over. Present the AWS Cloud Architecture diagram. Explain VPC separation: Public Subnet with EC2, Private DB Subnet with RDS, and decoupled S3 bucket. Handshake between Security Groups.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Cloud Infrastructure</span>
+          <h2 class="slide-title">AWS Multi-Tier Cloud Architecture</h2>
+          <p class="slide-subtitle">Production-ready VPC architecture built entirely within AWS Free Tier limits</p>
+        </div>
+        <span class="slide-number-pill">Slide 10 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="diagram-frame">
+            <img src="../diagrams/aws_architecture.png" alt="AWS Architecture Diagram">
+          </div>
+          <div class="card aws">
+            <div class="card-title"><span class="icon">☁️</span> Architectural Highlights</div>
+            <ul>
+              <li><strong>Region:</strong> <code>us-east-1</code> (N. Virginia).</li>
+              <li><strong>Web/App Layer (Public Subnet):</strong> EC2 (Ubuntu 24.04, t2.micro) running Nginx reverse proxy + Gunicorn WSGI.</li>
+              <li><strong>Database Layer (Private Subnet):</strong> Amazon RDS PostgreSQL instance strictly accessible only from EC2 SG.</li>
+              <li><strong>Object Media Storage:</strong> Amazon S3 bucket for photos with least-privilege IAM policy.</li>
+              <li><strong>Observability:</strong> Amazon CloudWatch telemetry tracking EC2 CPU and network load.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 11: Compute & Web Server Layer -->
+    <section class="slide" data-slide="11" data-speaker="Cloud Architect" data-time="7:30 – 10:30" data-notes="Detail the EC2 compute configuration. Explain Nginx reverse proxying, Gzip compression, WhiteNoise static caching, and Gunicorn systemd daemon for automatic restart on reboot.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Compute Tier</span>
+          <h2 class="slide-title">Amazon EC2, Nginx & Gunicorn WSGI</h2>
+          <p class="slide-subtitle">High-performance reverse proxy and daemonized application server</p>
+        </div>
+        <span class="slide-number-pill">Slide 11 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card emerald">
+            <div class="card-title"><span class="icon">⚙️</span> Server Configuration</div>
+            <ul>
+              <li><strong>Amazon EC2 Instance:</strong> Ubuntu Server 24.04 LTS, <code>t2.micro</code> (1 vCPU, 1 GiB RAM).</li>
+              <li><strong>Nginx 1.24+:</strong> Reverse proxy on port 80/443 with Gzip compression and static asset caching.</li>
+              <li><strong>Gunicorn 21+:</strong> WSGI worker process listening on Unix socket / port 8000.</li>
+              <li><strong>Systemd Daemon (<code>gunicorn.service</code>):</strong> Auto-restart on failure and server reboot.</li>
+              <li><strong>Static Assets:</strong> Compressed via WhiteNoise storage backend.</li>
+            </ul>
+          </div>
+          <div class="card blue">
+            <div class="card-title"><span class="icon">🔒</span> EC2 Security Group (<code>CampusFind-EC2-SG</code>)</div>
+            <table class="slide-table">
+              <thead>
+                <tr>
+                  <th>Port</th>
+                  <th>Protocol</th>
+                  <th>Source</th>
+                  <th>Purpose</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>80</code></td>
+                  <td>TCP (HTTP)</td>
+                  <td><code>0.0.0.0/0</code></td>
+                  <td>Public Web Traffic</td>
+                </tr>
+                <tr>
+                  <td><code>443</code></td>
+                  <td>TCP (HTTPS)</td>
+                  <td><code>0.0.0.0/0</code></td>
+                  <td>Secure Web Traffic</td>
+                </tr>
+                <tr>
+                  <td><code>22</code></td>
+                  <td>TCP (SSH)</td>
+                  <td><code>Admin-IP/32</code></td>
+                  <td>Restricted Admin SSH</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 12: Database Tier & RDS Integration -->
+    <section class="slide" data-slide="12" data-speaker="Database Lead" data-time="10:30 – 12:30" data-notes="Database Lead takes over. Present the 3NF ERD schema. Explain table relationships (auth_user 1-to-N core_item), column indexing on status/category, and RDS network security.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Database Tier</span>
+          <h2 class="slide-title">Amazon RDS PostgreSQL & 3NF Schema</h2>
+          <p class="slide-subtitle">Managed relational persistence, third normal form normalization, and DB isolation</p>
+        </div>
+        <span class="slide-number-pill">Slide 12 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="diagram-frame">
+            <img src="../diagrams/database_erd.png" alt="Database ERD Schema">
+          </div>
+          <div class="card amber">
+            <div class="card-title"><span class="icon">🗄️</span> RDS Architecture & Schema</div>
+            <ul>
+              <li><strong>Engine:</strong> Amazon RDS PostgreSQL 16 (Free Tier <code>db.t3.micro</code>).</li>
+              <li><strong>Private Subnet Security:</strong> <code>CampusFind-RDS-SG</code> permits inbound traffic on port <code>5432</code> <strong>strictly from <code>CampusFind-EC2-SG</code></strong>.</li>
+              <li><strong>Data Normalization (3NF):</strong> Clean separation between <code>auth_user</code> and <code>core_item</code> with cascading integrity.</li>
+              <li><strong>Query Indexing:</strong> Performance B-tree indexes placed on <code>status</code>, <code>category</code>, and <code>created_at</code>.</li>
+              <li><strong>Automated Seeding:</strong> <code>seed_data.py</code> generates test accounts and realistic campus records.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 13: Decoupled Object Storage (Amazon S3) -->
+    <section class="slide" data-slide="13" data-speaker="Storage & Security Lead" data-time="12:30 – 15:00" data-notes="Storage & Security Lead takes over. Explain why we decoupled media storage from EC2 to S3. Discuss boto3, django-storages, and the seamless offline local fallback.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Storage Architecture</span>
+          <h2 class="slide-title">Decoupled Media Storage with Amazon S3</h2>
+          <p class="slide-subtitle">Isolating ephemeral compute disk from persistent image assets</p>
+        </div>
+        <span class="slide-number-pill">Slide 13 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card cyan">
+            <div class="card-title"><span class="icon">📦</span> Amazon S3 Integration</div>
+            <ul>
+              <li><strong>Dedicated Bucket:</strong> <code>campusfind-item-images-capstone</code> in <code>us-east-1</code>.</li>
+              <li><strong>Stateless Compute:</strong> EC2 instances can be destroyed, scaled, or replaced without risking user uploaded photos.</li>
+              <li><strong>Direct Integration:</strong> Powered by <code>django-storages</code> and AWS Python SDK (<code>boto3</code>).</li>
+              <li><strong>Offline Fallback:</strong> If <code>USE_S3=False</code>, Django gracefully stores media in local directory for zero-config local development.</li>
+            </ul>
+          </div>
+          <div class="card blue">
+            <div class="card-title"><span class="icon">⚡</span> Upload Validation Pipeline</div>
+            <ul>
+              <li><strong>MIME & Format Whitelist:</strong> Only valid image types permitted (<code>.jpg</code>, <code>.jpeg</code>, <code>.png</code>, <code>.webp</code>, <code>.gif</code>).</li>
+              <li><strong>File Size Ceiling:</strong> Strict 5MB limit enforced both client-side (JS) and server-side (Django Form).</li>
+              <li><strong>Secure Filename Hashing:</strong> Random UUID/timestamp prefix prevents path traversal attacks and collisions.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 14: Security Governance & IAM Least Privilege -->
+    <section class="slide" data-slide="14" data-speaker="Storage & Security Lead" data-time="12:30 – 15:00" data-notes="Detail our security posture: Zero hardcoded secrets via .env, PBKDF2 SHA-256 password hashing, CSRF/XSS protection, and our scoped IAM policy JSON.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Cloud Security</span>
+          <h2 class="slide-title">IAM Least-Privilege & Application Hardening</h2>
+          <p class="slide-subtitle">Multi-layered defense across credentials, identity, framework, and network layers</p>
+        </div>
+        <span class="slide-number-pill">Slide 14 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card rose">
+            <div class="card-title"><span class="icon">🛡️</span> Application Security Defenses</div>
+            <ul>
+              <li><strong>Zero Hardcoded Secrets:</strong> Database hosts, API keys, and Django <code>SECRET_KEY</code> injected at runtime via <code>.env</code>.</li>
+              <li><strong>Cryptographic Password Hashing:</strong> PBKDF2 algorithm with SHA-256 and unique cryptographic salt per account.</li>
+              <li><strong>Injection Immunity:</strong> Parameterized Django ORM queries completely neutralize SQL injection risks.</li>
+              <li><strong>Cross-Site Mitigation:</strong> Strict CSRF tokens on all forms and auto-escaped HTML against XSS.</li>
+            </ul>
+          </div>
+          <div class="card aws">
+            <div class="card-title"><span class="icon">📜</span> IAM Least-Privilege Policy (JSON)</div>
+            <pre class="code-block">{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": "arn:aws:s3:::campusfind-item-images-capstone/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "arn:aws:s3:::campusfind-item-images-capstone"
+    }
+  ]
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 15: Automated Testing & QA Results -->
+    <section class="slide" data-slide="15" data-speaker="QA & Docs Lead" data-time="15:00 – 18:00" data-notes="QA Lead takes over. Present the automated test suite results. 9/9 automated tests passing with 100% success rate across models, CRUD, auth, validation, and health checks.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Quality Assurance</span>
+          <h2 class="slide-title">Automated Testing & Validation Results</h2>
+          <p class="slide-subtitle">Rigorous unit and integration test suite executing with 100% pass rate</p>
+        </div>
+        <span class="slide-number-pill">Slide 15 / 20</span>
+      </div>
+      <div class="slide-body">
+        <table class="slide-table">
+          <thead>
+            <tr>
+              <th>Test ID</th>
+              <th>Test Scenario</th>
+              <th>Verification Target</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>TC-01</code></td>
+              <td>User Registration</td>
+              <td>Account creation, password hashing, automatic session login</td>
+              <td><span class="badge-tag green">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>TC-02</code></td>
+              <td>User Authentication</td>
+              <td>Session establishment, logout destruction, invalid credential rejection</td>
+              <td><span class="badge-tag green">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>TC-03</code></td>
+              <td>Create Lost Item Post</td>
+              <td>Field validation, DB persistence, catalog appearance</td>
+              <td><span class="badge-tag green">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>TC-04</code></td>
+              <td>Create Found Item Post</td>
+              <td>Image attachment, S3 URL resolution, building preset validation</td>
+              <td><span class="badge-tag green">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>TC-05</code></td>
+              <td>Image Validation</td>
+              <td>Rejection of non-image MIME types & files exceeding 5MB ceiling</td>
+              <td><span class="badge-tag green">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>TC-06</code></td>
+              <td>Catalog Filtering</td>
+              <td>Keyword search ("MacBook"), category filter, status matching</td>
+              <td><span class="badge-tag green">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>TC-07</code></td>
+              <td>Ownership Authorization</td>
+              <td>Access control blocking non-owners from editing/deleting items</td>
+              <td><span class="badge-tag green">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>TC-08</code></td>
+              <td>Lifecycle Resolution</td>
+              <td>Toggling status to Claimed/Reunited + timestamp recording</td>
+              <td><span class="badge-tag green">PASS</span></td>
+            </tr>
+            <tr>
+              <td><code>TC-09</code></td>
+              <td>Cloud Health Endpoint</td>
+              <td><code>GET /health/</code> returning HTTP 200 JSON with DB ping</td>
+              <td><span class="badge-tag green">PASS</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SLIDE 16: Cloud Monitoring & Observability -->
+    <section class="slide" data-slide="16" data-speaker="QA & Docs Lead" data-time="15:00 – 18:00" data-notes="Explain Amazon CloudWatch telemetry and the /health/ endpoint. Show how AWS monitors EC2 CPU utilization, network traffic, and instance status.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Observability</span>
+          <h2 class="slide-title">CloudWatch Telemetry & Health Monitoring</h2>
+          <p class="slide-subtitle">Proactive system health verification and AWS cloud infrastructure metrics</p>
+        </div>
+        <span class="slide-number-pill">Slide 16 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card blue">
+            <div class="card-title"><span class="icon">🩺</span> Dedicated <code>/health/</code> Endpoint</div>
+            <p>Provides synthetic health probing for AWS Route 53, Application Load Balancers, and uptime monitors.</p>
+            <pre class="code-block">GET /health/ HTTP/1.1
+Host: campusfind.example.com
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "status": "healthy",
+  "database": "connected",
+  "storage": "operational",
+  "timestamp": "2026-08-22T10:00:00Z"
+}</pre>
+          </div>
+          <div class="card aws">
+            <div class="card-title"><span class="icon">📊</span> Amazon CloudWatch Telemetry</div>
+            <ul>
+              <li><strong>EC2 CPUUtilization:</strong> Monitored continuously; averages &lt; 3% under steady state.</li>
+              <li><strong>NetworkIn & NetworkOut:</strong> Real-time bandwidth tracking for web requests and image transfers.</li>
+              <li><strong>Instance Status Checks:</strong> Automated alerts if hypervisor or instance OS becomes unreachable.</li>
+              <li><strong>Log Aggregation:</strong> Nginx access/error logs piped for diagnostic analysis.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 17: Engineering Challenges & Solutions -->
+    <section class="slide" data-slide="17" data-speaker="QA & Docs Lead" data-time="15:00 – 18:00" data-notes="Discuss real engineering challenges solved during the sprint: WhiteNoise manifest during tests, decoupled S3 local fallback, and RDS private subnet security.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Engineering Reflections</span>
+          <h2 class="slide-title">Technical Challenges Encountered & Solutions</h2>
+          <p class="slide-subtitle">Key engineering problem-solving during the 3-day cloud development lifecycle</p>
+        </div>
+        <span class="slide-number-pill">Slide 17 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card amber">
+            <div class="card-title"><span class="icon">⚠️</span> WhiteNoise Test Manifest</div>
+            <p><strong>Challenge:</strong> Strict static file hashing caused <code>ValueError</code> in automated test runs when assets weren't pre-collected.</p>
+            <p><strong>Solution:</strong> Switched to <code>CompressedStaticFilesStorage</code> to retain high Gzip compression while eliminating test failures.</p>
+          </div>
+          <div class="card cyan">
+            <div class="card-title"><span class="icon">🔌</span> Offline Local Development</div>
+            <p><strong>Challenge:</strong> Enabling team members to develop and run tests offline without active AWS IAM credentials.</p>
+            <p><strong>Solution:</strong> Engineered conditional storage backend in <code>settings.py</code> switching automatically between local disk and S3 via <code>USE_S3</code>.</p>
+          </div>
+          <div class="card purple">
+            <div class="card-title"><span class="icon">🔒</span> RDS Subnet Isolation</div>
+            <p><strong>Challenge:</strong> Securing the database from public brute-force scans while allowing seamless EC2 migrations.</p>
+            <p><strong>Solution:</strong> Placed RDS in a private DB subnet group and configured <code>CampusFind-RDS-SG</code> to accept port 5432 only from <code>CampusFind-EC2-SG</code>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 18: Future Roadmap & Enhancements -->
+    <section class="slide" data-slide="18" data-speaker="QA & Docs Lead" data-time="15:00 – 18:00" data-notes="Present the future enhancements: Automated email keyword matching, printable QR code asset stickers, and multi-AZ load balancing with ALB.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Future Vision</span>
+          <h2 class="slide-title">System Roadmap & Future Enhancements</h2>
+          <p class="slide-subtitle">Planned evolutions to further scale the platform across multi-campus institutions</p>
+        </div>
+        <span class="slide-number-pill">Slide 18 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card blue">
+            <div class="card-title"><span class="icon">🤖</span> AI / Keyword Matching Engine</div>
+            <p>Automated asynchronous background task (via Celery/SQS) that compares newly reported found items with existing lost items and emails potential owners.</p>
+          </div>
+          <div class="card emerald">
+            <div class="card-title"><span class="icon">🏷️</span> QR Code Asset Stickers</div>
+            <p>Generate unique, printable QR code stickers that students can attach to laptops and bottles, enabling instant 1-tap reporting when scanned by finders.</p>
+          </div>
+          <div class="card aws">
+            <div class="card-title"><span class="icon">🌐</span> Multi-AZ High Availability</div>
+            <p>Deploy AWS Application Load Balancer (ALB) across multiple Availability Zones with Auto Scaling Groups for zero-downtime rolling deployments.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 19: Conclusion & Summary -->
+    <section class="slide" data-slide="19" data-speaker="Team Lead / All" data-time="15:00 – 18:00" data-notes="Summarize the capstone achievements. Reiterate successful AWS Free Tier compliance, decoupled architecture, robust security, and 100% automated test coverage.">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="slide-category">Conclusion</span>
+          <h2 class="slide-title">Project Summary & Capstone Achievements</h2>
+          <p class="slide-subtitle">Delivering an enterprise-grade cloud solution within academic sprint constraints</p>
+        </div>
+        <span class="slide-number-pill">Slide 19 / 20</span>
+      </div>
+      <div class="slide-body">
+        <div class="grid-4">
+          <div class="card blue">
+            <div class="card-title"><span class="icon">☁️</span> AWS Free Tier</div>
+            <p>100% compliant with Free Tier allowances across EC2, RDS, S3, IAM, and CloudWatch.</p>
+          </div>
+          <div class="card emerald">
+            <div class="card-title"><span class="icon">🧩</span> Decoupled Design</div>
+            <p>Compute, relational persistence, and media storage are cleanly separated for maximum resilience.</p>
+          </div>
+          <div class="card rose">
+            <div class="card-title"><span class="icon">🛡️</span> Hardened Security</div>
+            <p>Zero hardcoded secrets, salted password hashing, private RDS subnets, and scoped IAM policies.</p>
+          </div>
+          <div class="card purple">
+            <div class="card-title"><span class="icon">🧪</span> Verified QA</div>
+            <p>9 passing automated tests, synthetic <code>/health/</code> probing, and live CloudWatch telemetry.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 20: Q&A / Thank You -->
+    <section class="slide" data-slide="20" data-speaker="All Team Members" data-time="18:00+" data-notes="Thank the professor and audience. Open the floor for questions and technical evaluation.">
+      <div class="title-slide-content">
+        <div class="title-icon">🎉</div>
+        <h1 class="main-hero-title">Thank You!</h1>
+        <p class="hero-subtitle">CampusFind: A Cloud-Based Campus Lost & Found System</p>
+        
+        <div style="margin: 20px 0; display: flex; gap: 20px; justify-content: center;">
+          <div class="hero-meta-badge">💬 Questions & Answers</div>
+          <div class="hero-meta-badge">💻 Codebase & Live Demo Open</div>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 16px 24px; border-radius: 12px; border: 1px solid #334155; max-width: 600px; font-size: 0.95rem; color: #94A3B8;">
+          <p><strong>Prepared for CSBC 252: Introduction to Cloud Computing</strong></p>
+          <p style="margin-top: 6px;">All code, deployment scripts, DOCX deliverables, and automated tests are complete and verified.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Presenter Notes Drawer -->
+  <div class="speaker-notes-panel" id="speakerNotesPanel">
+    <div class="notes-header">
+      <span id="notesSpeakerTag">🎙️ SPEAKER SCRIPT: Team Lead / Project Manager</span>
+      <span style="color: var(--text-muted);">Press 'N' to Hide Notes</span>
+    </div>
+    <div class="notes-content" id="notesContent">
+      Loading speaker script notes...
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <footer class="bottom-bar">
+    <div class="nav-controls">
+      <button class="icon-btn" id="prevBtn" title="Previous Slide (Left Arrow / Backspace)">◀ Prev</button>
+      <button class="icon-btn" id="nextBtn" title="Next Slide (Right Arrow / Space)">Next ▶</button>
+      <span class="slide-counter" id="slideCounter">Slide 1 of 20</span>
+    </div>
+
+    <div>
+      <select class="slide-selector" id="slideSelector" aria-label="Jump to slide">
+        <option value="1">1. Title Slide (CampusFind)</option>
+        <option value="2">2. Executive Summary & Vision</option>
+        <option value="3">3. Problem Statement & Friction</option>
+        <option value="4">4. Project Objectives & Scope</option>
+        <option value="5">5. Team Roles & Responsibilities</option>
+        <option value="6">6. System Use Cases & Personas</option>
+        <option value="7">7. UI/UX Design System & Features</option>
+        <option value="8">8. Live Application Walkthrough</option>
+        <option value="9">9. Admin Operations Portal (/ops/)</option>
+        <option value="10">10. AWS Cloud Architecture</option>
+        <option value="11">11. Compute & Web Server Layer</option>
+        <option value="12">12. Database Tier & RDS PostgreSQL</option>
+        <option value="13">13. Decoupled S3 Media Storage</option>
+        <option value="14">14. Cloud Security & IAM Policies</option>
+        <option value="15">15. Automated Testing & QA Results</option>
+        <option value="16">16. CloudWatch & Health Telemetry</option>
+        <option value="17">17. Challenges & Solutions</option>
+        <option value="18">18. System Roadmap & Future Vision</option>
+        <option value="19">19. Project Summary & Achievements</option>
+        <option value="20">20. Q&A and Discussion</option>
+      </select>
+    </div>
+
+    <div style="font-size: 0.8rem; color: var(--text-muted);">
+      Shortcuts: <kbd>Space</kbd>/<kbd>→</kbd> Next · <kbd>←</kbd> Prev · <kbd>N</kbd> Notes · <kbd>O</kbd> Grid · <kbd>F</kbd> Fullscreen
+    </div>
+  </footer>
+
+  <!-- Slide Overview Grid Modal -->
+  <div class="overview-modal" id="overviewModal">
+    <div class="overview-header">
+      <h2 style="color: white; font-size: 1.5rem;">📑 Slide Deck Overview</h2>
+      <button class="icon-btn" id="closeOverviewBtn">✕ Close (Esc)</button>
+    </div>
+    <div class="overview-grid" id="overviewGrid">
+      <!-- Populated dynamically via JS -->
+    </div>
+  </div>
+
+  <script>
+    // Slide Deck Controller
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const totalSlides = slides.length;
+    let currentSlideIndex = 0;
+
+    // Elements
+    const progressBar = document.getElementById('progressBar');
+    const slideCounter = document.getElementById('slideCounter');
+    const slideSelector = document.getElementById('slideSelector');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const currentSpeakerName = document.getElementById('currentSpeakerName');
+    const speakerTime = document.getElementById('speakerTime');
+    const speakerNotesPanel = document.getElementById('speakerNotesPanel');
+    const notesContent = document.getElementById('notesContent');
+    const notesSpeakerTag = document.getElementById('notesSpeakerTag');
+    const notesToggleBtn = document.getElementById('notesToggleBtn');
+    const overviewToggleBtn = document.getElementById('overviewToggleBtn');
+    const overviewModal = document.getElementById('overviewModal');
+    const closeOverviewBtn = document.getElementById('closeOverviewBtn');
+    const overviewGrid = document.getElementById('overviewGrid');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+    // Timer Elements
+    const timerDisplay = document.getElementById('timerDisplay');
+    const timerToggleBtn = document.getElementById('timerToggleBtn');
+    const timerResetBtn = document.getElementById('timerResetBtn');
+    let timerSeconds = 0;
+    let timerInterval = null;
+    let isTimerRunning = false;
+
+    // Speaker mapping per slide
+    function updateSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+      currentSlideIndex = index;
+
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('active', i === currentSlideIndex);
+      });
+
+      const currentSlide = slides[currentSlideIndex];
+      const speaker = currentSlide.getAttribute('data-speaker') || 'Group';
+      const time = currentSlide.getAttribute('data-time') || '';
+      const notes = currentSlide.getAttribute('data-notes') || 'No speaker notes for this slide.';
+
+      // Update Top and Bottom UI
+      currentSpeakerName.textContent = speaker;
+      speakerTime.textContent = time ? `(${time})` : '';
+      slideCounter.textContent = `Slide ${currentSlideIndex + 1} of ${totalSlides}`;
+      slideSelector.value = currentSlideIndex + 1;
+
+      // Update Progress
+      const progressPercent = ((currentSlideIndex + 1) / totalSlides) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+
+      // Update Speaker Notes
+      notesSpeakerTag.textContent = `🎙️ SPEAKER SCRIPT (${speaker} · ${time})`;
+      notesContent.innerHTML = `<p><strong>Talking Points & Cues:</strong></p><p>${notes}</p>`;
+
+      // Buttons state
+      prevBtn.disabled = currentSlideIndex === 0;
+      nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+    }
+
+    function nextSlide() {
+      if (currentSlideIndex < totalSlides - 1) {
+        updateSlide(currentSlideIndex + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlideIndex > 0) {
+        updateSlide(currentSlideIndex - 1);
+      }
+    }
+
+    // Timer logic
+    function formatTime(totalSec) {
+      const mins = Math.floor(totalSec / 60);
+      const secs = totalSec % 60;
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function toggleTimer() {
+      if (isTimerRunning) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        timerToggleBtn.textContent = '⏱️ Run';
+        timerToggleBtn.classList.remove('active');
+      } else {
+        isTimerRunning = true;
+        timerToggleBtn.textContent = '⏸️ Pause';
+        timerToggleBtn.classList.add('active');
+        timerInterval = setInterval(() => {
+          timerSeconds++;
+          timerDisplay.textContent = formatTime(timerSeconds);
+          // Highlight warning at 15 mins (900s), danger at 18 mins (1080s)
+          if (timerSeconds >= 1080) {
+            timerDisplay.className = 'timer-widget danger';
+          } else if (timerSeconds >= 900) {
+            timerDisplay.className = 'timer-widget warning';
+          } else {
+            timerDisplay.className = 'timer-widget';
+          }
+        }, 1000);
+      }
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      timerSeconds = 0;
+      timerDisplay.textContent = '00:00';
+      timerDisplay.className = 'timer-widget';
+      timerToggleBtn.textContent = '⏱️ Run';
+      timerToggleBtn.classList.remove('active');
+    }
+
+    // Speaker Notes Drawer Toggle
+    function toggleNotes() {
+      const isOpen = speakerNotesPanel.classList.toggle('open');
+      notesToggleBtn.classList.toggle('active', isOpen);
+    }
+
+    // Overview Grid Generation
+    function buildOverviewGrid() {
+      overviewGrid.innerHTML = '';
+      slides.forEach((slide, idx) => {
+        const titleEl = slide.querySelector('.slide-title') || slide.querySelector('.main-hero-title');
+        const categoryEl = slide.querySelector('.slide-category');
+        const title = titleEl ? titleEl.textContent : `Slide ${idx + 1}`;
+        const category = categoryEl ? categoryEl.textContent : '';
+        const speaker = slide.getAttribute('data-speaker') || '';
+
+        const card = document.createElement('div');
+        card.className = `overview-card ${idx === currentSlideIndex ? 'active' : ''}`;
+        card.innerHTML = `
+          <div style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 700;">SLIDE ${idx + 1} ${category ? '· ' + category : ''}</div>
+          <h4>${title}</h4>
+          <p>👤 ${speaker}</p>
+        `;
+        card.addEventListener('click', () => {
+          updateSlide(idx);
+          toggleOverview();
+        });
+        overviewGrid.appendChild(card);
+      });
+    }
+
+    function toggleOverview() {
+      const isOpen = overviewModal.classList.toggle('open');
+      overviewToggleBtn.classList.toggle('active', isOpen);
+      if (isOpen) {
+        buildOverviewGrid();
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Event Listeners
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+    slideSelector.addEventListener('change', (e) => updateSlide(parseInt(e.target.value, 10) - 1));
+    notesToggleBtn.addEventListener('click', toggleNotes);
+    overviewToggleBtn.addEventListener('click', toggleOverview);
+    closeOverviewBtn.addEventListener('click', toggleOverview);
+    timerToggleBtn.addEventListener('click', toggleTimer);
+    timerResetBtn.addEventListener('click', resetTimer);
+    fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+      // If typing in an input/select, ignore
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') return;
+
+      switch(e.key) {
+        case 'ArrowRight':
+        case ' ':
+        case 'PageDown':
+          e.preventDefault();
+          nextSlide();
+          break;
+        case 'ArrowLeft':
+        case 'Backspace':
+        case 'PageUp':
+          e.preventDefault();
+          prevSlide();
+          break;
+        case 'Home':
+          e.preventDefault();
+          updateSlide(0);
+          break;
+        case 'End':
+          e.preventDefault();
+          updateSlide(totalSlides - 1);
+          break;
+        case 'n':
+        case 'N':
+          toggleNotes();
+          break;
+        case 'o':
+        case 'O':
+        case 'Escape':
+          if (overviewModal.classList.contains('open')) {
+            toggleOverview();
+          } else if (e.key === 'o' || e.key === 'O') {
+            toggleOverview();
+          }
+          break;
+        case 'f':
+        case 'F':
+          toggleFullscreen();
+          break;
+        case 'p':
+        case 'P':
+          if (e.ctrlKey || e.metaKey) return; // Allow normal print shortcut
+          window.print();
+          break;
+        case 't':
+        case 'T':
+          toggleTimer();
+          break;
+      }
+    });
+
+    // Initialize
+    updateSlide(0);
+  </script>
+</body>
+</html>

@@ -19,6 +19,8 @@ Every component of this project is documented in detail within the [`docs/`](doc
 | **06. Final Technical Report** | Comprehensive academic report covering lifecycle, design, and results | [📄 `docs/06_FINAL_TECHNICAL_REPORT.md`](docs/06_FINAL_TECHNICAL_REPORT.md) |
 | **07. Admin Role & Governance** | Admin portal specifications, audit logs, and data lifecycle | [🔒 `docs/07_ADMIN_ROLE_AND_REQUIREMENTS.md`](docs/07_ADMIN_ROLE_AND_REQUIREMENTS.md) |
 | **08. Group Roles & Responsibilities** | Complete team breakdown, 3-day work plan, and action checklist | [👥 `docs/08_GROUP_ROLES_AND_RESPONSIBILITIES.md`](docs/08_GROUP_ROLES_AND_RESPONSIBILITIES.md) |
+| **09. Presentation Slides & Speaker Guide** | 20-slide group presentation guide, scripts, Q&A prep, and interactive slide deck | [🖥️ `docs/09_PRESENTATION_SLIDES_AND_SPEAKER_GUIDE.md`](docs/09_PRESENTATION_SLIDES_AND_SPEAKER_GUIDE.md) / [✨ `presentation.html`](presentation.html) |
+| **10. Individual Video Slides & Scripts** | Role-by-role individual slides, screen-share cues, and teleprompter scripts | [🎬 `docs/INDIVIDUAL_VIDEO_PRESENTATION_SCRIPTS_AND_SLIDES.md`](docs/INDIVIDUAL_VIDEO_PRESENTATION_SCRIPTS_AND_SLIDES.md) / [✨ `individual_slides.html`](individual_slides.html) |
 
 ---
 
